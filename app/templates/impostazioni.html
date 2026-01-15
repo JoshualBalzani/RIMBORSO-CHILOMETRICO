@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impostazioni - Rimborso KM</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Rimborso KM" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .form-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-section h2 {
+            margin-top: 0;
+            margin-bottom: 4px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #0071e3;
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+        }
+
+        .form-group input[readonly] {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            grid-column: 1 / -1;
+            margin-top: 12px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            flex: 1;
+            background: white;
+            color: #333;
+        }
+
+        .btn:hover {
+            background: #f9f9f9;
+            border-color: #999;
+        }
+
+        .btn.primary {
+            background: #0071e3;
+            color: white;
+            border-color: #0071e3;
+        }
+
+        .btn.primary:hover {
+            background: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .btn.secondary {
+            background: white;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn.secondary:hover {
+            background: #f9f9f9;
+            border-color: #999;
+        }
+
+        .btn.warning {
+            background: white;
+            color: #ff9500;
+            border-color: #ff9500;
+        }
+
+        .btn.warning:hover {
+            background: #fff5e6;
+            border-color: #ff9500;
+        }
+
+        .section-description {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle-checkbox {
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            width: 18px !important;
+            height: 18px !important;
+            border: 2px solid #999 !important;
+            border-radius: 0 !important;
+            cursor: pointer;
+            background: white !important;
+            position: relative;
+            padding: 0 !important;
+            margin: 0 !important;
+            outline: none !important;
+            -webkit-outline: none !important;
+            box-shadow: none !important;
+            -webkit-box-shadow: none !important;
+            -moz-box-shadow: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-focus-ring-color: transparent !important;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            flex-shrink: 0;
+        }
+
+        .toggle-checkbox::-moz-focus-inner {
+            border: none !important;
+        }
+
+        .toggle-checkbox:focus,
+        .toggle-checkbox:focus-visible,
+        .toggle-checkbox:focus-within {
+            outline: none !important;
+            -webkit-outline: none !important;
+            box-shadow: none !important;
+        }
+
+        .toggle-checkbox:active {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        .toggle-checkbox::before,
+        .toggle-checkbox::after {
+            display: none !important;
+            content: none !important;
+        }
+
+        .toggle-checkbox:hover {
+            border-color: #0071e3;
+        }
+
+        .toggle-checkbox:checked {
+            background: #0071e3 !important;
+            border-color: #0071e3 !important;
+        }
+
+        .form-group label {
+            outline: none !important;
+            -webkit-outline: none !important;
+        }
+
+        .info-message {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .backup-history {
+            margin-top: 20px;
+        }
+
+        .backup-history h3 {
+            margin-bottom: 16px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .backup-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .backup-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            transition: all 0.3s;
+        }
+
+        .backup-item:hover {
+            background: #f0f8ff;
+            border-color: #0071e3;
+        }
+
+        .backup-item-info {
+            flex: 1;
+        }
+
+        .backup-item-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .backup-item-details {
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            gap: 16px;
+        }
+
+        .backup-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            padding: 6px 12px;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-action:hover {
+            border-color: #0071e3;
+            color: #0071e3;
+        }
+
+        .btn-action.delete:hover {
+            border-color: #ff3b30;
+            color: #ff3b30;
+        }
+
+        .loading-text {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+        }
+
+        .backup-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn-backup {
+            flex: 1;
+            min-width: 150px;
+            padding: 10px 16px;
+            background-color: white;
+            color: #0071e3;
+            border: 2px solid #0071e3;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-backup:hover {
+            background-color: #0071e3;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 113, 227, 0.2);
+        }
+
+        .btn-backup:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            main.container {
+                padding: 12px;
+            }
+
+            .form-section {
+                padding: 16px;
+                margin-bottom: 16px;
+                border-radius: 8px;
+            }
+
+            .page-header h1 {
+                font-size: 24px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Backup buttons responsivi */
+            .backup-buttons {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 16px;
+            }
+
+            .btn-backup {
+                flex: 1;
+                min-width: auto;
+                width: 100%;
+                padding: 12px 16px;
+                font-size: 13px;
+            }
+
+            /* Cronologia backup responsiva */
+            .backup-item {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 12px;
+            }
+
+            .backup-item-info {
+                width: 100%;
+            }
+
+            .backup-item-name {
+                font-size: 14px;
+                margin-bottom: 8px;
+                word-break: break-all;
+            }
+
+            .backup-item-details {
+                flex-direction: column;
+                gap: 4px;
+                width: 100%;
+            }
+
+            .backup-item-details span {
+                display: block;
+                font-size: 12px;
+            }
+
+            .backup-item-actions {
+                width: 100%;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .btn-action {
+                width: 100%;
+                padding: 8px 12px;
+                font-size: 12px;
+                text-align: center;
+            }
+
+            /* Form actions button stack */
+            .form-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <!-- Navigation - Top Bar (Desktop Only) -->
+    <nav class="navbar" role="navigation" aria-label="Navigazione principale">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <img src="/web-app-manifest-512x512.png" alt="Rimborso KM" class="logo-icon" />
+                <span class="logo-text">Rimborso KM</span>
+            </div>
+            <div class="navbar-user">
+                <div class="navbar-avatar" id="navbar-avatar" onclick="toggleUserMenu(event)">JB</div>
+                <span class="navbar-username" id="navbar-username" onclick="toggleUserMenu(event)">Utente</span>
+                <div class="user-dropdown-menu" id="user-dropdown-menu">
+                    <div class="user-dropdown-header">
+                        <div class="user-dropdown-avatar" id="dropdown-avatar">JB</div>
+                        <div>
+                            <div class="user-dropdown-name" id="dropdown-name">Utente</div>
+                            <div class="user-dropdown-role" id="dropdown-role">User</div>
+                        </div>
+                    </div>
+                    <div class="user-dropdown-divider"></div>
+                    <div class="user-dropdown-mobile-items">
+                        <a href="/veicoli" class="user-dropdown-item">🚙 Veicoli</a>
+                        <a href="/clienti" class="user-dropdown-item">👔 Clienti</a>
+                        <a href="/indirizzi-aziendali" class="user-dropdown-item">📍 Indirizzi</a>
+                    </div>
+                    <div class="user-dropdown-divider"></div>
+                    <a href="/impostazioni" class="user-dropdown-item">⚙️ Impostazioni</a>
+                    <a href="#" onclick="logout(); return false;" class="user-dropdown-item">🚪 Esci</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav" role="navigation" aria-label="Navigazione">
+        <ul>
+            <li><a href="/" class="nav-link" data-page="dashboard" title="Dashboard"><span class="icon">📊</span><span>Dashboard</span></a></li>
+            <li id="menu-trasferte"><a href="/trasferte" class="nav-link" data-page="trasferte" title="Trasferte"><span class="icon">🚗</span><span>Trasferte</span></a></li>
+            <li id="menu-archivio"><a href="/archivio" class="nav-link" data-page="archivio" title="Archivio"><span class="icon">📁</span><span>Archivio</span></a></li>
+            <li id="menu-veicoli"><a href="/veicoli" class="nav-link" data-page="veicoli" title="Veicoli"><span class="icon">🚙</span><span>Veicoli</span></a></li>
+            <li id="menu-clienti"><a href="/clienti" class="nav-link" data-page="clienti" title="Clienti"><span class="icon">👔</span><span>Clienti</span></a></li>
+            <li id="menu-indirizzi"><a href="/indirizzi-aziendali" class="nav-link" data-page="indirizzi" title="Indirizzi"><span class="icon">📍</span><span>Indirizzi</span></a></li>
+            <li id="admin-menu-item" style="display: none;"><a href="/impostazioni-utenti" class="nav-link" data-page="utenti" title="Utenti" onclick="window.location.href='/impostazioni-utenti'; return false;"><span class="icon">👥</span><span>Utenti</span></a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        <header class="page-header">
+            <h1>Impostazioni</h1>
+            <p class="subtitle" id="subtitle-impostazioni">Configura backup, preferenze e altre opzioni</p>
+        </header>
+
+        <!-- SEZIONE 0: CAMBIO PASSWORD (TUTTI GLI UTENTI) -->
+        <section class="form-section">
+            <h2>🔐 Cambio Password</h2>
+            <p class="section-description">Modifica la tua password di accesso</p>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="password-attuale">Password Attuale</label>
+                    <input type="password" id="password-attuale" placeholder="Inserisci la tua password attuale">
+                </div>
+
+                <div class="form-group">
+                    <label for="password-nuova">Nuova Password</label>
+                    <input type="password" id="password-nuova" placeholder="Inserisci la nuova password">
+                </div>
+
+                <div class="form-group">
+                    <label for="password-conferma">Conferma Password</label>
+                    <input type="password" id="password-conferma" placeholder="Conferma la nuova password">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button id="btn-cambio-password" class="btn primary">🔄 Cambia Password</button>
+            </div>
+
+            <div class="info-message" style="display: none;" id="message-cambio-password"></div>
+        </section>
+
+        <!-- 2FA REMOVED -->
+
+        <!-- SEZIONE 0.5: DATI AZIENDALI (SOLO ADMIN) -->
+        <section class="form-section" id="section-dati-aziendali" style="display: none;">
+            <h2>🏢 Dati Aziendali</h2>
+            <p class="section-description">Gestisci le informazioni della tua azienda</p>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="dati-nome-azienda">Nome Azienda</label>
+                    <input type="text" id="dati-nome-azienda" placeholder="Es. Acme Corp S.r.l.">
+                </div>
+
+                <div class="form-group">
+                    <label for="dati-indirizzo">Indirizzo Principale</label>
+                    <input type="text" id="dati-indirizzo" placeholder="Es. Via Roma 123, 00100 Roma">
+                </div>
+
+                <div class="form-group">
+                    <label for="dati-telefono">Telefono</label>
+                    <input type="tel" id="dati-telefono" placeholder="Es. +39 06 1234 5678">
+                </div>
+
+                <div class="form-group">
+                    <label for="dati-email">Email</label>
+                    <input type="email" id="dati-email" placeholder="Es. info@azienda.it">
+                </div>
+
+                <div class="form-group">
+                    <label for="dati-partita-iva">Partita IVA</label>
+                    <input type="text" id="dati-partita-iva" placeholder="Es. 12345678901">
+                </div>
+
+                <div class="form-group">
+                    <label for="dati-codice-fiscale">Codice Fiscale</label>
+                    <input type="text" id="dati-codice-fiscale" placeholder="Es. AAAAAA00A00A000A">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button id="btn-reimposta-dati" class="btn">↺ Reimposta</button>
+                <button id="btn-salva-dati-aziendali" class="btn primary">💾 Salva Dati</button>
+            </div>
+
+            <div class="info-message" style="display: none;" id="message-dati-aziendali"></div>
+        </section>
+
+        <!-- SEZIONE 1: BACKUP & GESTIONE DATI (SOLO ADMIN) -->
+        <section class="form-section" id="section-smtp" style="display: none;">
+            <h2>📧 Configurazione SMTP (Email)</h2>
+            <p class="section-description">Configura le impostazioni per l'invio di email (password reset, notifiche)</p>
+            
+            <div id="smtp-config-container"></div>
+        </section>
+
+        <!-- SEZIONE: SERVER CONFIGURATION (SOLO ADMIN) -->
+        <section class="form-section" id="section-server-config" style="display: none;">
+            <h2>🌐 Configurazione Server</h2>
+            <p class="section-description">Configura l'URL base del server per email e accessi da remote (es. produzione con IP statico)</p>
+            
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label>Modalità Configurazione</label>
+                <div class="toggle-switch">
+                    <label style="margin: 0; font-weight: normal;">
+                        <input type="radio" name="server-mode" value="component" checked style="margin-right: 4px;"> Componenti (Protocol, Host, Port)
+                    </label>
+                </div>
+                <div class="toggle-switch" style="margin-top: 8px;">
+                    <label style="margin: 0; font-weight: normal;">
+                        <input type="radio" name="server-mode" value="direct" style="margin-right: 4px;"> URL Diretto
+                    </label>
+                </div>
+            </div>
+
+            <!-- Modalità Componenti -->
+            <div id="component-mode" class="form-grid">
+                <div class="form-group">
+                    <label for="server-duckdns">🦆 Dominio DuckDNS (opzionale per HTTPS)</label>
+                    <input type="text" id="server-duckdns" placeholder="Es. mioapp.duckdns.org">
+                    <small style="margin-top: 4px; color: #666;">Lascia vuoto per HTTP. Con dominio → HTTPS automatico con certificato valido</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="server-protocol">Protocol</label>
+                    <select id="server-protocol">
+                        <option value="https">HTTPS</option>
+                        <option value="http">HTTP</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="server-host">Host / Indirizzo IP</label>
+                    <input type="text" id="server-host" placeholder="Es. 192.168.1.100 oppure miodominio.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="server-port">Port (opzionale)</label>
+                    <input type="number" id="server-port" placeholder="Es. 5000" min="1" max="65535">
+                </div>
+            </div>
+
+            <!-- Modalità URL Diretto -->
+            <div id="direct-mode" class="form-grid" style="display: none;">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="server-base-url">URL Base Completo</label>
+                    <input type="text" id="server-base-url" placeholder="Es. https://192.168.1.100:5000 oppure https://miodominio.com">
+                </div>
+            </div>
+
+            <!-- URL Corrente -->
+            <div class="info-message" style="margin: 16px 0; background: #f0f8ff; border-left: 4px solid #0071e3;">
+                <strong>🔗 URL Corrente:</strong>
+                <div id="current-server-url" style="font-family: monospace; margin-top: 8px; padding: 8px; background: white; border-radius: 4px; border: 1px solid #ddd;">
+                    Non configurato (usa http://localhost:5000)
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button id="btn-reimposta-server" class="btn secondary">↺ Reimposta</button>
+                <button id="btn-salva-server-config" class="btn primary">💾 Salva Configurazione</button>
+            </div>
+
+            <div id="message-server-config" class="info-message" style="display: none; margin-top: 12px;"></div>
+        </section>
+
+        <section class="form-section" id="section-backup" style="display: none;">
+            <h2>💾 Backup & Gestione Dati</h2>
+            <p class="section-description">Esporta, importa e gestisci i backup dei tuoi dati</p>
+            
+            <div class="backup-buttons">
+                <button id="btn-esporta-backup" class="btn-backup">
+                    💾 Esporta Dati (JSON)
+                </button>
+                <button id="btn-importa-backup" class="btn-backup">
+                    📥 Importa Dati
+                </button>
+                <button id="btn-crea-backup-manuale" class="btn-backup">
+                    🔄 Crea Backup Ora
+                </button>
+            </div>
+
+            <div class="info-message">
+                <strong>💡 Info:</strong> Scarica un backup completo di tutti i tuoi dati (trasferte, veicoli, clienti, indirizzi). Puoi importarlo in qualsiasi momento per ripristinare i dati.
+            </div>
+
+            <!-- Cronologia Backup -->
+            <div class="backup-history">
+                <h3>📋 Cronologia Backup</h3>
+                <div id="backup-list" class="backup-list">
+                    <p class="loading-text">Caricamento backup...</p>
+                </div>
+            </div>
+
+            <input type="file" id="file-import-backup" style="display: none;" accept=".json" />
+        </section>
+
+        <!-- SEZIONE 2: IMPOSTAZIONI BACKUP AUTOMATICO (SOLO ADMIN) -->
+        <section class="form-section" id="section-backup-auto" style="display: none;">
+            <h2>🔄 Backup Automatico</h2>
+            <p class="section-description">Gestisci i backup automatici programmati dal server</p>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Backup Giornaliero</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="backup-giornaliero" class="toggle-checkbox">
+                        <span style="margin: 0;">Attivo</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="backup-giornaliero-ora">Ora Esecuzione</label>
+                    <input type="time" id="backup-giornaliero-ora" value="02:00">
+                </div>
+
+                <div class="form-group">
+                    <label>Backup Settimanale</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="backup-settimanale" class="toggle-checkbox">
+                        <span style="margin: 0;">Attivo</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="backup-settimanale-giorno">Giorno Esecuzione</label>
+                    <select id="backup-settimanale-giorno">
+                        <option value="0">Domenica</option>
+                        <option value="1" selected>Lunedì</option>
+                        <option value="2">Martedì</option>
+                        <option value="3">Mercoledì</option>
+                        <option value="4">Giovedì</option>
+                        <option value="5">Venerdì</option>
+                        <option value="6">Sabato</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="backup-settimanale-ora">Ora Esecuzione</label>
+                    <input type="time" id="backup-settimanale-ora" value="03:00">
+                </div>
+
+                <div class="form-group">
+                    <label for="max-backups">Mantieni ultimi backup</label>
+                    <input type="number" id="max-backups" min="5" max="50" value="10">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button id="btn-ripristina-backup-settings" class="btn warning">↺ Ripristina Default</button>
+                <button id="btn-salva-backup-settings" class="btn primary">💾 Salva Impostazioni</button>
+            </div>
+
+            <div class="info-message">
+                <strong>ℹ️ Nota:</strong> I backup automatici vengono eseguiti dal server. Continueranno a funzionare anche se l'app non è aperta.
+            </div>
+        </section>
+
+        <!-- SEZIONE: STRUMENTI AMMINISTRATIVI (SOLO ADMIN) -->
+        <section class="form-section" id="section-admin-tools" style="display: none;">
+            <h2>⚙️ Strumenti Amministrativi</h2>
+            <p class="section-description">Operazioni critiche per la gestione del sistema</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                <!-- Reset Database Card -->
+                <div style="background: #fee2e2; border: 2px solid #dc2626; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                        <span style="font-size: 24px;">🗑️</span>
+                        <h3 style="margin: 0; color: #7f1d1d; font-size: 14px; font-weight: 600;">Reset Database</h3>
+                    </div>
+                    <p style="margin: 0; color: #991b1b; font-size: 12px;">Cancella completamente TUTTI i dati dal database. Questa azione è IRREVERSIBILE. Assicurati di aver fatto un backup prima!</p>
+                    <button onclick="initiateDbReset()" style="background: #dc2626; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; align-self: flex-start;">
+                        ⚠️ Resetta Database
+                    </button>
+                    <button onclick="downloadDatabaseBackup()" style="background: #16a34a; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; align-self: flex-start;">
+                        ⬇️ Scarica Backup
+                    </button>
+                </div>
+
+                <!-- System Info Card -->
+                <div style="background: #dbeafe; border: 2px solid #0284c7; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                        <span style="font-size: 24px;">ℹ️</span>
+                        <h3 style="margin: 0; color: #0c2d48; font-size: 14px; font-weight: 600;">Informazioni Sistema</h3>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px;">
+                        <div>
+                            <span style="color: #0369a1; font-weight: 500;">Database Size:</span>
+                            <span id="admin-db-size" style="color: #334155;">-</span>
+                        </div>
+                        <div>
+                            <span style="color: #0369a1; font-weight: 500;">Total Users:</span>
+                            <span id="admin-total-users" style="color: #334155;">-</span>
+                        </div>
+                        <div>
+                            <span style="color: #0369a1; font-weight: 500;">Total Trips:</span>
+                            <span id="admin-total-trips" style="color: #334155;">-</span>
+                        </div>
+                    </div>
+                    <button onclick="loadAdminSystemInfo()" style="background: #0284c7; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; align-self: flex-start;">
+                        🔄 Aggiorna Info
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/accessibility.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+    <script>
+        // Carica lista backup all'avvio
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Verifica se utente è autenticato, altrimenti reindirizza al login
+            try {
+                const authCheck = await fetchApi('/api/auth/user');
+                if (!authCheck || !authCheck.username) {
+                    window.location.href = '/login';
+                    return;
+                }
+            } catch (error) {
+                window.location.href = '/login';
+                return;
+            }
+            
+            // Carica informazioni utente attuale
+            await caricaUtenteAttuale();
+            
+            // Event listener cambio password
+            document.getElementById('btn-cambio-password').addEventListener('click', cambiaPassword);
+            
+            // Event listeners per backup settings (solo se admin)
+            const btnSalvaBkp = document.getElementById('btn-salva-backup-settings');
+            if (btnSalvaBkp) {
+                btnSalvaBkp.addEventListener('click', salvaImpostazioniBackup);
+            }
+            
+            const btnRipristina = document.getElementById('btn-ripristina-backup-settings');
+            if (btnRipristina) {
+                btnRipristina.addEventListener('click', ripristinaImpostazioniBackupDefault);
+            }
+        });
+
+        // Carica informazioni utente attuale e mostra/nascondi sezioni in base al ruolo
+        async function caricaUtenteAttuale() {
+            try {
+                const response = await fetchApi('/api/auth/user');
+                
+                if (response.username) {
+                    // Aggiorna username nella navbar
+                    const usernameEl = document.getElementById('currentUsername');
+                    if (usernameEl) {
+                        usernameEl.textContent = response.nome_completo || response.username;
+                    }
+                    
+                    const isAdmin = response.is_admin || response.ruolo === 'admin';
+                    console.log('User role check - is_admin:', response.is_admin, 'ruolo:', response.ruolo, 'isAdmin:', isAdmin);
+                    
+                    // Aggiorna il sottotitolo
+                    const subtitle = document.getElementById('subtitle-impostazioni');
+                    if (isAdmin) {
+                        subtitle.textContent = 'Gestisci backup, database e impostazioni del sistema';
+                    } else {
+                        subtitle.textContent = 'Modifica la tua password di accesso';
+                    }
+                    
+                    // Se admin: nascondi menu trasferte/archivio/etc
+                    // Se user: mostra menu trasferte/archivio/etc
+                    if (isAdmin) {
+                        const menuTrasferte = document.getElementById('menu-trasferte-imp');
+                        const menuArchivio = document.getElementById('menu-archivio-imp');
+                        const menuVeicoli = document.getElementById('menu-veicoli-imp');
+                        const menuClienti = document.getElementById('menu-clienti-imp');
+                        const menuIndirizzi = document.getElementById('menu-indirizzi-imp');
+                        const adminMenuItem = document.getElementById('admin-menu-item-imp');
+                        
+                        if (menuTrasferte) menuTrasferte.style.display = 'none';
+                        if (menuArchivio) menuArchivio.style.display = 'none';
+                        if (menuVeicoli) menuVeicoli.style.display = 'none';
+                        if (menuClienti) menuClienti.style.display = 'none';
+                        if (menuIndirizzi) menuIndirizzi.style.display = 'none';
+                        if (adminMenuItem) adminMenuItem.style.display = 'block';
+                    } else {
+                        // User normale: mostra menu trasferte/archivio/etc
+                        const menuTrasferte = document.getElementById('menu-trasferte-imp');
+                        const menuArchivio = document.getElementById('menu-archivio-imp');
+                        const menuVeicoli = document.getElementById('menu-veicoli-imp');
+                        const menuClienti = document.getElementById('menu-clienti-imp');
+                        const menuIndirizzi = document.getElementById('menu-indirizzi-imp');
+                        const adminMenuItem = document.getElementById('admin-menu-item-imp');
+                        
+                        if (menuTrasferte) menuTrasferte.style.display = 'block';
+                        if (menuArchivio) menuArchivio.style.display = 'block';
+                        if (menuVeicoli) menuVeicoli.style.display = 'block';
+                        if (menuClienti) menuClienti.style.display = 'block';
+                        if (menuIndirizzi) menuIndirizzi.style.display = 'block';
+                        if (adminMenuItem) adminMenuItem.style.display = 'none';
+                    }
+                    
+                    // Mostra/nascondi sezioni admin
+                    const sectionBackup = document.getElementById('section-backup');
+                    const sectionBackupAuto = document.getElementById('section-backup-auto');
+                    const sectionDatiAziendali = document.getElementById('section-dati-aziendali');
+                    const sectionSMTP = document.getElementById('section-smtp');
+                    const sectionServerConfig = document.getElementById('section-server-config');
+                    const sectionAdminTools = document.getElementById('section-admin-tools');
+                    
+                    if (isAdmin) {
+                        console.log('Admin detected, showing admin sections and loading data');
+                        if (sectionBackup) sectionBackup.style.display = 'block';
+                        if (sectionBackupAuto) sectionBackupAuto.style.display = 'block';
+                        if (sectionDatiAziendali) sectionDatiAziendali.style.display = 'block';
+                        if (sectionSMTP) sectionSMTP.style.display = 'block';
+                        if (sectionServerConfig) sectionServerConfig.style.display = 'block';
+                        if (sectionAdminTools) sectionAdminTools.style.display = 'block';
+                        
+                        // Carica dati backup solo per admin
+                        if (typeof caricaListaBackup === 'function') caricaListaBackup();
+                        if (typeof caricaInfoSistema === 'function') caricaInfoSistema();
+                        if (typeof caricaImpostazioniBackup === 'function') caricaImpostazioniBackup();
+                        if (typeof caricaDatiAziendali === 'function') caricaDatiAziendali();
+                        if (typeof caricaSMTPConfig === 'function') caricaSMTPConfig();
+                        if (typeof caricaServerConfig === 'function') caricaServerConfig();
+                        if (typeof loadAdminSystemInfo === 'function') loadAdminSystemInfo();
+                        
+                        // Event listeners dati aziendali
+                        const btnSalvaDatiAz = document.getElementById('btn-salva-dati-aziendali');
+                        const btnRimpostaDAz = document.getElementById('btn-reimposta-dati');
+                        if (btnSalvaDatiAz) btnSalvaDatiAz.addEventListener('click', salvaDatiAziendali);
+                        if (btnRimpostaDAz) btnRimpostaDAz.addEventListener('click', reimpostaForm);
+                        
+                        // Event listeners server config
+                        document.querySelectorAll('input[name="server-mode"]').forEach(radio => {
+                            radio.addEventListener('change', cambiaModalitaServer);
+                        });
+                        const btnSalvaServerCfg = document.getElementById('btn-salva-server-config');
+                        const btnRipristinaServer = document.getElementById('btn-reimposta-server');
+                        if (btnSalvaServerCfg) btnSalvaServerCfg.addEventListener('click', salvaServerConfig);
+                        if (btnRipristinaServer) btnRipristinaServer.addEventListener('click', reimpostaServerConfig);
+                    }
+                }
+            } catch (error) {
+                console.error('Errore caricamento utente:', error);
+            }
+        }
+
+        // Carica dati aziendali dal server
+        async function caricaDatiAziendali() {
+            try {
+                const response = await fetchApi('/api/dati-aziendali');
+                if (response) {
+                    document.getElementById('dati-nome-azienda').value = response.nome_azienda || '';
+                    document.getElementById('dati-indirizzo').value = response.indirizzo_principale || '';
+                    document.getElementById('dati-telefono').value = response.telefono || '';
+                    document.getElementById('dati-email').value = response.email || '';
+                    document.getElementById('dati-partita-iva').value = response.partita_iva || '';
+                    document.getElementById('dati-codice-fiscale').value = response.codice_fiscale || '';
+                }
+            } catch (error) {
+                console.error('Errore caricamento dati aziendali:', error);
+            }
+        }
+
+        // Salva dati aziendali
+        async function salvaDatiAziendali() {
+            const messageDiv = document.getElementById('message-dati-aziendali');
+            
+            const dati = {
+                nome_azienda: document.getElementById('dati-nome-azienda').value.trim(),
+                indirizzo_principale: document.getElementById('dati-indirizzo').value.trim(),
+                telefono: document.getElementById('dati-telefono').value.trim(),
+                email: document.getElementById('dati-email').value.trim(),
+                partita_iva: document.getElementById('dati-partita-iva').value.trim(),
+                codice_fiscale: document.getElementById('dati-codice-fiscale').value.trim()
+            };
+            
+            try {
+                const response = await fetchApi('/api/dati-aziendali', {
+                    method: 'POST',
+                    body: JSON.stringify(dati)
+                });
+                
+                if (response.success) {
+                    mostrarMessaggio(messageDiv, '✅ ' + (response.message || 'Dati salvati con successo'), 'success');
+                } else {
+                    mostrarMessaggio(messageDiv, '❌ ' + (response.error || 'Errore nel salvataggio'), 'error');
+                }
+            } catch (error) {
+                console.error('Errore salvataggio dati aziendali:', error);
+                mostrarMessaggio(messageDiv, '❌ Errore nel salvataggio dei dati', 'error');
+            }
+        }
+
+        // Reimposta form ai valori precedenti
+        async function reimpostaForm() {
+            await caricaDatiAziendali();
+            const messageDiv = document.getElementById('message-dati-aziendali');
+            messageDiv.style.display = 'none';
+        }
+
+        // Funzione logout
+        function logout() {
+            if (confirm('Sei sicuro di voler uscire?')) {
+                window.location.href = '/logout';
+            }
+        }
+
+        // Funzione cambio password
+        async function cambiaPassword() {
+            const passwordAttuale = document.getElementById('password-attuale').value;
+            const passwordNuova = document.getElementById('password-nuova').value;
+            const passwordConferma = document.getElementById('password-conferma').value;
+            const messageDiv = document.getElementById('message-cambio-password');
+            
+            // Validazione
+            if (!passwordAttuale || !passwordNuova || !passwordConferma) {
+                mostrarMessaggio(messageDiv, '❌ Compila tutti i campi', 'error');
+                return;
+            }
+            
+            if (passwordNuova.length < 8) {
+                mostrarMessaggio(messageDiv, '❌ La password deve essere almeno 8 caratteri', 'error');
+                return;
+            }
+            
+            if (passwordNuova !== passwordConferma) {
+                mostrarMessaggio(messageDiv, '❌ Le password non coincidono', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetchApi('/api/auth/cambio-password', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        password_attuale: passwordAttuale,
+                        password_nuova: passwordNuova
+                    })
+                });
+                
+                if (response.success) {
+                    mostrarMessaggio(messageDiv, '✅ ' + response.message, 'success');
+                    // Pulisci i campi
+                    document.getElementById('password-attuale').value = '';
+                    document.getElementById('password-nuova').value = '';
+                    document.getElementById('password-conferma').value = '';
+                } else {
+                    mostrarMessaggio(messageDiv, '❌ ' + (response.error || 'Errore nel cambio password'), 'error');
+                }
+            } catch (error) {
+                console.error('Errore cambio password:', error);
+                mostrarMessaggio(messageDiv, '❌ Errore nel cambio password', 'error');
+            }
+        }
+
+        // Funzione helper per mostrare messaggi
+        function mostrarMessaggio(div, messaggio, tipo) {
+            div.textContent = messaggio;
+            div.className = 'info-message';
+            if (tipo === 'error') {
+                div.style.backgroundColor = '#fee';
+                div.style.borderColor = '#fcc';
+                div.style.color = '#c33';
+            } else {
+                div.style.backgroundColor = '#efe';
+                div.style.borderColor = '#cfc';
+                div.style.color = '#3c3';
+            }
+            div.style.display = 'block';
+        }
+
+        // Carica impostazioni backup automatico
+        async function caricaImpostazioniBackup() {
+            try {
+                const response = await fetchApi('/api/backup/settings');
+                
+                if (response.success) {
+                    document.getElementById('backup-giornaliero').checked = response.daily_enabled;
+                    document.getElementById('backup-giornaliero-ora').value = response.daily_time;
+                    
+                    document.getElementById('backup-settimanale').checked = response.weekly_enabled;
+                    document.getElementById('backup-settimanale-giorno').value = response.weekly_day;
+                    document.getElementById('backup-settimanale-ora').value = response.weekly_time;
+                    
+                    document.getElementById('max-backups').value = response.max_backups;
+                }
+            } catch (error) {
+                console.error('Errore caricamento impostazioni backup:', error);
+            }
+        }
+
+        // Salva impostazioni backup automatico
+        async function salvaImpostazioniBackup() {
+            try {
+                const data = {
+                    daily_enabled: document.getElementById('backup-giornaliero').checked,
+                    daily_time: document.getElementById('backup-giornaliero-ora').value,
+                    weekly_enabled: document.getElementById('backup-settimanale').checked,
+                    weekly_day: parseInt(document.getElementById('backup-settimanale-giorno').value),
+                    weekly_time: document.getElementById('backup-settimanale-ora').value,
+                    max_backups: parseInt(document.getElementById('max-backups').value)
+                };
+                
+                const response = await fetchApi('/api/backup/settings', {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.success) {
+                    alert('✅ Impostazioni backup salvate con successo!');
+                } else {
+                    alert('❌ Errore nel salvataggio: ' + response.error);
+                }
+            } catch (error) {
+                console.error('Errore salvataggio impostazioni:', error);
+                alert('❌ Errore nel salvataggio delle impostazioni');
+            }
+        }
+
+        // Ripristina impostazioni di default
+        async function ripristinaImpostazioniBackupDefault() {
+            if (!confirm('Sei sicuro di voler ripristinare le impostazioni di default?')) return;
+            
+            try {
+                const response = await fetchApi('/api/backup/settings/reset', {
+                    method: 'POST'
+                });
+                
+                if (response.success) {
+                    await caricaImpostazioniBackup();
+                    alert('✅ Impostazioni ripristinate con successo!');
+                } else {
+                    alert('❌ Errore nel ripristino: ' + response.error);
+                }
+            } catch (error) {
+                console.error('Errore ripristino impostazioni:', error);
+                alert('❌ Errore nel ripristino delle impostazioni');
+            }
+        }
+
+        // Funzione per caricare info di sistema
+        async function caricaInfoSistema() {
+            try {
+                // Controlla se gli elementi esistono prima di accedervi
+                const dbInfoEl = document.getElementById('db-info');
+                const backupSpaceEl = document.getElementById('backup-space');
+                
+                // Se gli elementi non esistono, skipa questa funzione
+                if (!dbInfoEl || !backupSpaceEl) {
+                    console.log('[INFO] Elementi db-info/backup-space non trovati, skippando');
+                    return;
+                }
+                
+                const response = await fetchApi('/api/trasferte');
+                const trasferte = Array.isArray(response) ? response : response.items || [];
+                
+                dbInfoEl.value = `${trasferte.length} trasferte registrate`;
+                
+                const backupResponse = await fetchApi('/api/backup/list');
+                let spaceUsed = 0;
+                if (backupResponse.backups) {
+                    spaceUsed = backupResponse.backups.reduce((sum, b) => sum + parseFloat(b.size_mb), 0);
+                }
+                
+                backupSpaceEl.value = `${spaceUsed.toFixed(2)} MB`;
+            } catch (error) {
+                console.error('Errore caricamento info:', error);
+            }
+        }
+
+        // Carica configurazione SMTP
+        async function caricaSMTPConfig() {
+            try {
+                const response = await fetchApi('/api/smtp-config');
+                const container = document.getElementById('smtp-config-container');
+                
+                if (!response || !response.id) {
+                    // Nessuna config, mostra form di creazione
+                    container.innerHTML = getSMTPFormHTML(null);
+                } else {
+                    // Config esiste, mostra dati
+                    container.innerHTML = getSMTPFormHTML(response);
+                }
+                
+                // Attach event listeners
+                const saveBtn = document.getElementById('btn-salva-smtp');
+                const testBtn = document.getElementById('btn-test-smtp');
+                
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', salvaSMTPConfig);
+                }
+                if (testBtn) {
+                    testBtn.addEventListener('click', testSMTPConfig);
+                }
+            } catch (error) {
+                console.error('Errore caricamento SMTP config:', error);
+                document.getElementById('smtp-config-container').innerHTML = 
+                    '<div style="color: #c33; padding: 12px; background: #fee; border-radius: 4px;">⚠️ Errore nel caricamento della configurazione SMTP</div>';
+            }
+        }
+
+        function getSMTPFormHTML(config) {
+            const isGmail = config?.provider === 'gmail' || !config;
+            const provider = config?.provider || 'gmail';
+            const server = config?.smtp_server || 'smtp.gmail.com';
+            const port = config?.smtp_port || 587;
+            
+            return `
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="smtp-provider">Provider</label>
+                        <select id="smtp-provider" onchange="updateSMTPProvider(this.value)">
+                            <option value="gmail" ${provider === 'gmail' ? 'selected' : ''}>Gmail</option>
+                            <option value="outlook" ${provider === 'outlook' ? 'selected' : ''}>Outlook/Office 365</option>
+                            <option value="custom" ${provider === 'custom' ? 'selected' : ''}>SMTP Personalizzato</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="smtp-enabled">
+                            <input type="checkbox" id="smtp-enabled" ${config?.enabled ? 'checked' : ''}>
+                            Abilitato
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="smtp-server">Server SMTP</label>
+                        <input type="text" id="smtp-server" value="${server}" placeholder="smtp.gmail.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="smtp-port">Porta</label>
+                        <input type="number" id="smtp-port" value="${port}" min="1" max="65535">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="smtp-use-tls">
+                            <input type="checkbox" id="smtp-use-tls" ${config?.use_tls ? 'checked' : 'checked'}>
+                            Usa TLS
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="smtp-use-ssl">
+                            <input type="checkbox" id="smtp-use-ssl" ${config?.use_ssl ? 'checked' : ''}>
+                            Usa SSL
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="smtp-username">Email/Username SMTP</label>
+                        <input type="email" id="smtp-username" value="${config?.username || ''}" placeholder="tua-email@gmail.com">
+                    </div>
+
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="smtp-password">Password</label>
+                        <input type="password" id="smtp-password" placeholder="Password SMTP (non salvata in chiaro)">
+                        <small style="color: #888; margin-top: 4px; display: block;">${config ? '✓ Una password è già salvata' : 'Inserisci la password SMTP'}</small>
+                    </div>
+
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="smtp-from-email">Email Mittente</label>
+                        <input type="email" id="smtp-from-email" value="${config?.from_email || ''}" placeholder="noreply@azienda.it">
+                    </div>
+
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="smtp-from-name">Nome Mittente</label>
+                        <input type="text" id="smtp-from-name" value="${config?.from_name || 'Rimborso KM'}" placeholder="Rimborso KM">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="smtp-test-email">Email Test</label>
+                        <input type="email" id="smtp-test-email" value="${config?.test_email || ''}" placeholder="Indirizzo per test email">
+                        <small style="color: #888; margin-top: 4px; display: block;">Opzionale: inserisci un'email per testare la configurazione</small>
+                    </div>
+                </div>
+
+                ${config?.test_result ? `
+                <div style="margin-bottom: 16px; padding: 12px; background: ${config.test_result === 'success' ? '#e6f7e6' : '#fee'}; border: 1px solid ${config.test_result === 'success' ? '#c3e6c3' : '#fcc'}; border-radius: 4px; font-size: 12px;">
+                    ${config.test_result === 'success' ? '✅ Ultimo test: RIUSCITO' : '❌ Ultimo test: FALLITO'}
+                    ${config.test_at ? ` (${new Date(config.test_at).toLocaleString('it-IT')})` : ''}
+                </div>
+                ` : ''}
+
+                <div class="form-actions">
+                    <button id="btn-test-smtp" class="btn warning">🧪 Test Connessione</button>
+                    <button id="btn-salva-smtp" class="btn primary">💾 Salva Configurazione</button>
+                </div>
+
+                <div id="message-smtp" style="display: none; margin-top: 12px; padding: 12px; border-radius: 4px; font-size: 13px;"></div>
+            `;
+        }
+
+        function updateSMTPProvider(provider) {
+            const serverEl = document.getElementById('smtp-server');
+            const portEl = document.getElementById('smtp-port');
+            const tlsEl = document.getElementById('smtp-use-tls');
+            const sslEl = document.getElementById('smtp-use-ssl');
+
+            switch(provider) {
+                case 'gmail':
+                    serverEl.value = 'smtp.gmail.com';
+                    portEl.value = 587;
+                    tlsEl.checked = true;
+                    sslEl.checked = false;
+                    break;
+                case 'outlook':
+                    serverEl.value = 'smtp.office365.com';
+                    portEl.value = 587;
+                    tlsEl.checked = true;
+                    sslEl.checked = false;
+                    break;
+                case 'custom':
+                    serverEl.value = '';
+                    serverEl.placeholder = 'Inserisci il server SMTP';
+                    break;
+            }
+        }
+
+        async function salvaSMTPConfig() {
+            const messageDiv = document.getElementById('message-smtp');
+            
+            const dati = {
+                enabled: document.getElementById('smtp-enabled').checked,
+                provider: document.getElementById('smtp-provider').value,
+                smtp_server: document.getElementById('smtp-server').value.trim(),
+                smtp_port: parseInt(document.getElementById('smtp-port').value),
+                use_tls: document.getElementById('smtp-use-tls').checked,
+                use_ssl: document.getElementById('smtp-use-ssl').checked,
+                username: document.getElementById('smtp-username').value.trim(),
+                password: document.getElementById('smtp-password').value || undefined,
+                from_email: document.getElementById('smtp-from-email').value.trim(),
+                from_name: document.getElementById('smtp-from-name').value.trim(),
+            };
+            
+            // Validazione
+            if (!dati.smtp_server || !dati.username || !dati.from_email) {
+                mostrarMessaggio(messageDiv, '❌ Compila tutti i campi obbligatori', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetchApi('/api/smtp-config', {
+                    method: 'POST',
+                    body: JSON.stringify(dati)
+                });
+                
+                if (response.success) {
+                    mostrarMessaggio(messageDiv, '✅ ' + (response.message || 'Configurazione salvata'), 'success');
+                    // Ricarica configurazione
+                    setTimeout(() => caricaSMTPConfig(), 2000);
+                } else {
+                    mostrarMessaggio(messageDiv, '❌ ' + (response.error || 'Errore nel salvataggio'), 'error');
+                }
+            } catch (error) {
+                console.error('Errore salvataggio SMTP:', error);
+                mostrarMessaggio(messageDiv, '❌ Errore nel salvataggio della configurazione', 'error');
+            }
+        }
+
+        async function testSMTPConfig() {
+            const testEmail = document.getElementById('smtp-test-email').value.trim();
+            const messageDiv = document.getElementById('message-smtp');
+            
+            if (!testEmail) {
+                mostrarMessaggio(messageDiv, '⚠️ Inserisci un indirizzo email per il test', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetchApi('/api/smtp-test', {
+                    method: 'POST',
+                    body: JSON.stringify({ test_email: testEmail })
+                });
+                
+                if (response.success) {
+                    mostrarMessaggio(messageDiv, '✅ ' + (response.message || 'Test riuscito'), 'success');
+                    // Ricarica configurazione
+                    setTimeout(() => caricaSMTPConfig(), 2000);
+                } else {
+                    mostrarMessaggio(messageDiv, '❌ ' + (response.error || 'Test fallito'), 'error');
+                }
+            } catch (error) {
+                console.error('Errore test SMTP:', error);
+                mostrarMessaggio(messageDiv, '❌ Errore durante il test', 'error');
+            }
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // SERVER CONFIG FUNCTIONS
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        async function caricaServerConfig() {
+            try {
+                const response = await fetchApi('/api/server-config');
+                
+                // Carica dominio DuckDNS
+                if (response.dominio_duckdns) {
+                    document.getElementById('server-duckdns').value = response.dominio_duckdns;
+                }
+                
+                if (response.enabled && response.current_url) {
+                    // Carica componenti o URL diretto
+                    if (response.base_url) {
+                        // Modalità diretta
+                        document.querySelector('input[name="server-mode"][value="direct"]').checked = true;
+                        document.getElementById('server-base-url').value = response.base_url;
+                        cambiaModalitaServer();
+                    } else {
+                        // Modalità componenti
+                        document.querySelector('input[name="server-mode"][value="component"]').checked = true;
+                        document.getElementById('server-protocol').value = response.protocol || 'https';
+                        document.getElementById('server-host').value = response.host || '';
+                        document.getElementById('server-port').value = response.port || '';
+                        cambiaModalitaServer();
+                    }
+                    
+                    // Aggiorna URL corrente
+                    document.getElementById('current-server-url').innerHTML = `<strong>${response.current_url}</strong>`;
+                } else {
+                    // Nessuna configurazione
+                    document.getElementById('current-server-url').innerHTML = 'Non configurato (usa http://localhost:5000)';
+                }
+            } catch (error) {
+                console.error('Errore caricamento server config:', error);
+                document.getElementById('current-server-url').innerHTML = 'Errore nel caricamento della configurazione';
+            }
+        }
+
+        function cambiaModalitaServer() {
+            const mode = document.querySelector('input[name="server-mode"]:checked').value;
+            const componentMode = document.getElementById('component-mode');
+            const directMode = document.getElementById('direct-mode');
+            
+            if (mode === 'component') {
+                componentMode.style.display = 'grid';
+                directMode.style.display = 'none';
+            } else {
+                componentMode.style.display = 'none';
+                directMode.style.display = 'grid';
+            }
+        }
+
+        async function salvaServerConfig() {
+            const modeRadio = document.querySelector('input[name="server-mode"]:checked');
+            if (!modeRadio) {
+                console.error('No server mode selected');
+                return;
+            }
+            
+            const mode = modeRadio.value;
+            const messageDiv = document.getElementById('message-server-config');
+            
+            let payload = { mode };
+            
+            // Dominio DuckDNS (sempre opzionale)
+            const duckdnsVal = document.getElementById('server-duckdns').value.trim();
+            payload.dominio_duckdns = duckdnsVal || null;
+            
+            if (mode === 'component') {
+                payload.protocol = document.getElementById('server-protocol').value;
+                payload.host = document.getElementById('server-host').value.trim();
+                const portVal = document.getElementById('server-port').value;
+                payload.port = portVal && portVal.trim() ? parseInt(portVal) : null;
+                
+                if (!payload.host) {
+                    mostrarMessaggio(messageDiv, '❌ Host è obbligatorio', 'error');
+                    return;
+                }
+            } else {
+                payload.base_url = document.getElementById('server-base-url').value.trim();
+                
+                if (!payload.base_url) {
+                    mostrarMessaggio(messageDiv, '❌ URL base è obbligatorio', 'error');
+                    return;
+                }
+                
+                if (!payload.base_url.startsWith('http://') && !payload.base_url.startsWith('https://')) {
+                    mostrarMessaggio(messageDiv, '❌ URL deve iniziare con http:// o https://', 'error');
+                    return;
+                }
+            }
+            
+            try {
+                const response = await fetchApi('/api/server-config', {
+                    method: 'PUT',
+                    body: JSON.stringify(payload)
+                });
+                
+                if (response.success) {
+                    mostrarMessaggio(messageDiv, '✅ Configurazione server salvata', 'success');
+                    document.getElementById('current-server-url').innerHTML = `<strong>${response.current_url}</strong>`;
+                    
+                    setTimeout(() => {
+                        messageDiv.style.display = 'none';
+                    }, 3000);
+                } else {
+                    mostrarMessaggio(messageDiv, '❌ ' + (response.error || 'Errore nel salvataggio'), 'error');
+                }
+            } catch (error) {
+                console.error('Errore salvataggio server config:', error);
+                mostrarMessaggio(messageDiv, '❌ Errore nel salvataggio della configurazione', 'error');
+            }
+        }
+
+        async function reimpostaServerConfig() {
+            if (confirm('Sei sicuro? Questo ripristinerà la configurazione al default.')) {
+                document.querySelector('input[name="server-mode"][value="component"]').checked = true;
+                document.getElementById('server-duckdns').value = '';
+                document.getElementById('server-protocol').value = 'https';
+                document.getElementById('server-host').value = '';
+                document.getElementById('server-port').value = '';
+                document.getElementById('server-base-url').value = '';
+                cambiaModalitaServer();
+                document.getElementById('current-server-url').innerHTML = 'Non configurato (usa http://localhost:5000)';
+            }
+        }
+
+        function toggleMobileMenu() {
+            const navMenu = document.getElementById('navMenu');
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            navMenu.classList.toggle('active');
+            hamburgerBtn.classList.toggle('active');
+        }
+
+        // Chiudi menu quando clicchi su un link
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                const navMenu = document.getElementById('navMenu');
+                const hamburgerBtn = document.getElementById('hamburgerBtn');
+                if (navMenu) navMenu.classList.remove('active');
+                if (hamburgerBtn) hamburgerBtn.classList.remove('active');
+            });
+        });
+
+        // Chiudi menu quando ridimensioni la finestra
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                const navMenu = document.getElementById('navMenu');
+                const hamburgerBtn = document.getElementById('hamburgerBtn');
+                if (navMenu) navMenu.classList.remove('active');
+                if (hamburgerBtn) hamburgerBtn.classList.remove('active');
+            }
+        });
+
+        // ==================== ADMIN TOOLS FUNCTIONS ====================
+
+        async function initiateDbReset() {
+            // Step 1: chiedi conferma testuale
+            const confirmText = prompt(
+                '⚠️ ATTENZIONE: Questa azione cancella TUTTI i dati dal database ed è IRREVERSIBILE.\n\n' +
+                'Digita "RESET" (maiuscolo) per confermare:',
+                ''
+            );
+            
+            if (!confirmText || confirmText !== 'RESET') {
+                alert('Reset annullato.');
+                return;
+            }
+            
+            // Step 2: conferma finale con dialog
+            const finalConfirm = confirm(
+                '⚠️ ULTIMA AVVERTENZA!\n\n' +
+                'Stai per eliminare completamente il database.\n' +
+                'Tutti i dati verranno persi.\n\n' +
+                'Sei VERAMENTE sicuro?'
+            );
+            
+            if (!finalConfirm) {
+                alert('Reset annullato.');
+                return;
+            }
+            
+            // Step 3: esegui il reset
+            try {
+                const resetResponse = await fetchApi('/api/admin/database/reset', {
+                    method: 'POST',
+                    body: JSON.stringify({ confirmed: true })
+                });
+                
+                if (resetResponse && resetResponse.status === 'success') {
+                    alert('✅ Database resettato con successo!\n\nIl sistema verrà ricaricato.');
+                    location.reload();
+                } else if (resetResponse && resetResponse.error) {
+                    alert('❌ Errore durante il reset:\n' + resetResponse.error);
+                } else {
+                    alert('❌ Errore durante il reset del database.');
+                }
+            } catch (error) {
+                console.error('Errore reset database:', error);
+                alert('❌ Errore durante il reset del database: ' + error.message);
+            }
+        }
+
+        async function loadAdminSystemInfo() {
+            try {
+                // Carica info database
+                const dbResponse = await fetchApi('/api/admin/db-info');
+                if (dbResponse) {
+                    document.getElementById('admin-db-size').textContent = dbResponse.db_size || '-';
+                }
+
+                // Carica numero utenti
+                const usersResponse = await fetchApi('/api/admin/users');
+                if (Array.isArray(usersResponse)) {
+                    document.getElementById('admin-total-users').textContent = usersResponse.length;
+                }
+
+                // Carica numero trasferte
+                const tripsResponse = await fetchApi('/api/trasferte');
+                if (Array.isArray(tripsResponse)) {
+                    document.getElementById('admin-total-trips').textContent = tripsResponse.length;
+                } else if (tripsResponse && tripsResponse.items) {
+                    document.getElementById('admin-total-trips').textContent = tripsResponse.items.length;
+                }
+            } catch (error) {
+                console.error('Errore caricamento system info:', error);
+            }
+        }
+
+        async function downloadDatabaseBackup() {
+            try {
+                const response = await fetch('/api/backup/create', {
+                    method: 'POST',
+                    credentials: 'same-origin'
+                });
+                
+                if (response.ok) {
+                    alert('✅ Backup creato con successo!');
+                    // Ricarica la lista di backup
+                    caricaListaBackup();
+                } else {
+                    alert('❌ Errore nella creazione del backup');
+                }
+            } catch (error) {
+                console.error('Errore backup:', error);
+                alert('❌ Errore nella creazione del backup');
+            }
+        }
+        
+        // Setup bottom menu visibility based on user role
+        setupMenuVisibility();
+    </script>
+</body>
+</html>

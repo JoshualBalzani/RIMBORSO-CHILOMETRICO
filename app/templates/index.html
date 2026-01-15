@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Rimborso KM - Dashboard</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Rimborso KM" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="has-bottom-nav">
+    <!-- Navigation - Top Bar (Desktop Only) -->
+    <nav class="navbar" role="navigation" aria-label="Navigazione principale">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <img src="/web-app-manifest-512x512.png" alt="Rimborso KM" class="logo-icon" />
+                <span class="logo-text">Rimborso KM</span>
+            </div>
+            <div class="navbar-user">
+                <div class="navbar-avatar" id="navbar-avatar" onclick="toggleUserMenu(event)">JB</div>
+                <span class="navbar-username" id="navbar-username" onclick="toggleUserMenu(event)">Utente</span>
+                
+                <!-- User Dropdown Menu -->
+                <div class="user-dropdown-menu" id="user-dropdown-menu">
+                    <div class="user-dropdown-header">
+                        <div class="user-dropdown-avatar" id="dropdown-avatar">JB</div>
+                        <div>
+                            <div class="user-dropdown-name" id="dropdown-name">Utente</div>
+                            <div class="user-dropdown-role" id="dropdown-role">User</div>
+                        </div>
+                    </div>
+                    <div class="user-dropdown-divider"></div>
+                    <div class="user-dropdown-mobile-items">
+                        <a href="/veicoli" class="user-dropdown-item">🚙 Veicoli</a>
+                        <a href="/clienti" class="user-dropdown-item">👔 Clienti</a>
+                        <a href="/indirizzi-aziendali" class="user-dropdown-item">📍 Indirizzi</a>
+                    </div>
+                    <div class="user-dropdown-divider"></div>
+                    <a href="/impostazioni" class="user-dropdown-item">⚙️ Impostazioni</a>
+                    <a href="#" onclick="logout(); return false;" class="user-dropdown-item">🚪 Esci</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Bottom Navigation Bar - Mobile & Tablet -->
+    <nav class="bottom-nav" role="navigation" aria-label="Navigazione">
+        <ul>
+            <li><a href="/" class="nav-link active" data-page="dashboard" title="Dashboard"><span class="icon">📊</span><span>Dashboard</span></a></li>
+            <li id="menu-trasferte" style="display: none;"><a href="/trasferte" class="nav-link" data-page="trasferte" title="Trasferte"><span class="icon">🚗</span><span>Trasferte</span></a></li>
+            <li id="menu-archivio" style="display: none;"><a href="/archivio" class="nav-link" data-page="archivio" title="Archivio"><span class="icon">📁</span><span>Archivio</span></a></li>
+            <li id="menu-veicoli" style="display: none;"><a href="/veicoli" class="nav-link" data-page="veicoli" title="Veicoli"><span class="icon">🚙</span><span>Veicoli</span></a></li>
+            <li id="menu-clienti" style="display: none;"><a href="/clienti" class="nav-link" data-page="clienti" title="Clienti"><span class="icon">👔</span><span>Clienti</span></a></li>
+            <li id="menu-indirizzi" style="display: none;"><a href="/indirizzi-aziendali" class="nav-link" data-page="indirizzi" title="Indirizzi"><span class="icon">📍</span><span>Indirizzi</span></a></li>
+            <li id="admin-menu-item" style="display: none;"><a href="/impostazioni-utenti" class="nav-link" data-page="utenti" title="Utenti" onclick="window.location.href='/impostazioni-utenti'; return false;"><span class="icon">👥</span><span>Utenti</span></a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container" id="main-content">
+        <!-- Dashboard -->
+        <div id="dashboard-view" class="view active">
+            <header class="page-header">
+            </header>
+
+            <!-- Welcome Section -->
+            <section class="welcome-section">
+                <div class="welcome-content">
+                    <h2>Rimborso KM</h2>
+                    <p>Gestisci trasferte, veicoli e rimborsi in modo semplice e intuitivo.</p>
+                    <div class="welcome-user" id="welcomeUser" style="display: none;">
+                        <p class="welcome-greeting">Bentornato, <strong id="userGreeting">Utente</strong> 👋</p>
+                    </div>
+                    
+                    <!-- User Dashboard (nascosto per admin) -->
+                    <div id="user-dashboard" style="display: none; margin-top: var(--spacing-3xl);">
+                        
+                        <!-- Dashboard Header -->
+                        <div class="dashboard-header">
+                            <h2>La Tua Attività</h2>
+                            <p class="dashboard-subtitle">Riepilogo trasferte e rimborsi</p>
+                        </div>
+
+                        <!-- User Stats Grid - Redesigned -->
+                        <div class="dashboard-stats-container">
+                            <div class="stat-card-modern">
+                                <div class="stat-card-emoji">📋</div>
+                                <p class="stat-card-label">Trasferte</p>
+                                <p class="stat-card-value" id="user-stat-trasferte">0</p>
+                            </div>
+
+                            <div class="stat-card-modern">
+                                <div class="stat-card-emoji">🚗</div>
+                                <p class="stat-card-label">Veicoli</p>
+                                <p class="stat-card-value" id="user-stat-veicoli">0</p>
+                            </div>
+
+                            <div class="stat-card-modern">
+                                <div class="stat-card-emoji">⛽</div>
+                                <p class="stat-card-label">KM Totali</p>
+                                <p class="stat-card-value" id="user-stat-km">0</p>
+                            </div>
+
+                            <div class="stat-card-modern stat-card-accent">
+                                <div class="stat-card-emoji">💰</div>
+                                <p class="stat-card-label">Rimborsi</p>
+                                <p class="stat-card-value" id="user-stat-rimborsi">€0</p>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions - Redesigned -->
+                        <div class="dashboard-actions-section">
+                            <h3 class="section-title">Accesso Rapido</h3>
+                            <div class="dashboard-action-grid">
+                                <a href="/trasferte" class="action-card">
+                                    <div class="action-emoji">➕</div>
+                                    <span class="action-card-text">Nuova Trasferta</span>
+                                </a>
+                                <a href="/veicoli" class="action-card">
+                                    <div class="action-emoji">🚙</div>
+                                    <span class="action-card-text">Aggiungi Veicolo</span>
+                                </a>
+                                <a href="/archivio" class="action-card">
+                                    <div class="action-emoji">📁</div>
+                                    <span class="action-card-text">Vedi Archivio</span>
+                                </a>
+                                <a href="/impostazioni" class="action-card">
+                                    <div class="action-emoji">⚙️</div>
+                                    <span class="action-card-text">Impostazioni</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Admin Server Info (nascosto di default) -->
+                    <div id="admin-server-info" style="display: none; margin-top: var(--spacing-3xl);">
+                        <h3 style="margin-bottom: var(--spacing-lg); color: var(--color-gray-900); font-size: 1.25rem;">Statistiche Server</h3>
+                        <div class="server-stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">👥</div>
+                                <h4>Utenti Totali</h4>
+                                <p class="stat-value" id="stat-total-users">-</p>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">🚗</div>
+                                <h4>Veicoli Registrati</h4>
+                                <p class="stat-value" id="stat-total-vehicles">-</p>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">📍</div>
+                                <h4>Trasferte Totali</h4>
+                                <p class="stat-value" id="stat-total-trasferte">-</p>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">💾</div>
+                                <h4>Spazio Database</h4>
+                                <p class="stat-value" id="stat-db-size">-</p>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">💰</div>
+                                <h4>Rimborsi Totali</h4>
+                                <p class="stat-value" id="stat-total-reimbursement">-</p>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">📊</div>
+                                <h4>KM Totali</h4>
+                                <p class="stat-value" id="stat-total-km">-</p>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">💾</div>
+                                <h4>Backup Ultimi</h4>
+                                <p class="stat-value" id="stat-last-backup">-</p>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">📈</div>
+                                <h4>Spazio Backup</h4>
+                                <p class="stat-value" id="stat-backup-space">-</p>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">🔧</div>
+                                <h4>Versione Server</h4>
+                                <p class="stat-value" id="stat-server-version">-</p>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">⏱️</div>
+                                <h4>Uptime</h4>
+                                <p class="stat-value" id="stat-uptime">-</p>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">🌐</div>
+                                <h4>Clienti Totali</h4>
+                                <p class="stat-value" id="stat-total-clienti">-</p>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">🏢</div>
+                                <h4>Indirizzi Aziendali</h4>
+                                <p class="stat-value" id="stat-total-indirizzi">-</p>
+                            </div>
+                        </div>
+
+                        <!-- Docker Container Info -->
+                        <div id="docker-info-section" style="margin-top: var(--spacing-3xl); display: none;">
+                            <h3 style="margin-bottom: var(--spacing-lg); color: var(--color-gray-900); font-size: 1.25rem;">🐳 Informazioni Container</h3>
+                            <div class="docker-info-box" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); padding: var(--spacing-lg); border-radius: 8px; color: white; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-md);">
+                                <div style="padding: var(--spacing-md); background: rgba(255,255,255,0.1); border-radius: 6px;">
+                                    <p style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 4px;">Container ID</p>
+                                    <p style="font-family: monospace; font-size: 0.875rem; word-break: break-all; font-weight: 500;" id="docker-container-id">-</p>
+                                </div>
+                                <div style="padding: var(--spacing-md); background: rgba(255,255,255,0.1); border-radius: 6px;">
+                                    <p style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 4px;">Image</p>
+                                    <p style="font-family: monospace; font-size: 0.875rem; word-break: break-all; font-weight: 500;" id="docker-image">-</p>
+                                </div>
+                                <div style="padding: var(--spacing-md); background: rgba(255,255,255,0.1); border-radius: 6px;">
+                                    <p style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 4px;">Port</p>
+                                    <p style="font-family: monospace; font-size: 0.875rem; font-weight: 500;" id="docker-port">-</p>
+                                </div>
+                                <div style="padding: var(--spacing-md); background: rgba(255,255,255,0.1); border-radius: 6px;">
+                                    <p style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 4px;">Container Name</p>
+                                    <p style="font-family: monospace; font-size: 0.875rem; word-break: break-all; font-weight: 500;" id="docker-container-name">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Trasferte -->
+        <div id="trasferte-view" class="view">
+            <iframe src="/trasferte" style="width: 100%; border: none; height: 100vh;"></iframe>
+        </div>
+
+        <!-- Veicoli -->
+        <div id="veicoli-view" class="view">
+            <iframe src="/veicoli" style="width: 100%; border: none; height: 100vh;"></iframe>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <div id="modal-overlay" class="modal-overlay"></div>
+
+    <!-- Modal Nuova Trasferta (semplificato, il vero è in trasferte.html) -->
+    <div id="modal-trasferta" class="modal">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h2>Nuova Trasferta</h2>
+            <p style="text-align: center; margin-top: 20px;">
+                Vai alla pagina <a href="/trasferte">Trasferte</a> per inserire un nuovo viaggio.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Configurazione menu in base al ruolo
+        function setupMenuVisibility() {
+            console.log('[SETUP] Configuring menu visibility...');
+            
+            fetch('/api/auth/user', { credentials: 'same-origin' })
+                .then(response => {
+                    console.log('[AUTH] Response status:', response.status);
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return null;
+                    }
+                    if (!response.ok) {
+                        // Ignora altri errori (499, etc)
+                        console.warn('[AUTH] Non-OK response:', response.status);
+                        return null;
+                    }
+                    return response.json();
+                })
+                .then(user => {
+                    if (!user) return;
+                    
+                    console.log('[USER] Username:', user.username);
+                    console.log('[USER] Ruolo:', user.ruolo);
+                    console.log('[USER] Is Admin:', user.ruolo === 'admin');
+                    
+                    // Aggiorna nome utente (con check se elemento esiste)
+                    const usernameEl = document.getElementById('currentUsername');
+                    if (usernameEl) {
+                        usernameEl.textContent = user.nome_completo || user.username;
+                    }
+                    
+                    // Mostra benvenuto con nome utente
+                    const welcomeUser = document.getElementById('welcomeUser');
+                    const userGreeting = document.getElementById('userGreeting');
+                    if (welcomeUser && userGreeting && user.nome_completo) {
+                        userGreeting.textContent = user.nome_completo;
+                        welcomeUser.style.display = 'block';
+                    }
+                    
+                    // Menu "specialistici" (nascosti per default)
+                    const specialMenus = [
+                        'menu-trasferte',
+                        'menu-archivio', 
+                        'menu-veicoli',
+                        'menu-clienti',
+                        'menu-indirizzi'
+                    ];
+                    
+                    // Se è admin: NASCONDI menu trasferte/archivio/etc
+                    // Se è user: MOSTRA menu trasferte/archivio/etc, NASCONDI menu utenti
+                    if (user.ruolo === 'admin') {
+                        console.log('[MENU] Admin - nascondendo menu trasferte/archivio/etc');
+                        specialMenus.forEach(id => {
+                            const el = document.getElementById(id);
+                            if (el) el.style.display = 'none';
+                        });
+                        // Mostra menu utenti per admin
+                        const adminMenu = document.getElementById('admin-menu-item');
+                        if (adminMenu) adminMenu.style.display = 'block';
+                        console.log('[MENU] Admin - mostrato menu utenti');
+                        
+                        // Mostra dashboard admin e nascondi feature grid
+                        const adminInfo = document.getElementById('admin-server-info');
+                        const userDash = document.getElementById('user-dashboard');
+                        if (adminInfo) adminInfo.style.display = 'block';
+                        if (userDash) userDash.style.display = 'none';
+                        
+                        // Carica dati server
+                        if (typeof loadAdminServerStats === 'function') loadAdminServerStats();
+                    } else {
+                        console.log('[MENU] User normale - mostrando menu trasferte/archivio/etc');
+                        specialMenus.forEach(id => {
+                            const el = document.getElementById(id);
+                            if (el) el.style.display = 'block';
+                        });
+                        // Nascondi menu utenti per user normali
+                        const adminMenu = document.getElementById('admin-menu-item');
+                        if (adminMenu) adminMenu.style.display = 'none';
+                        console.log('[MENU] User - menu specializzati mostrati, menu utenti nascosto');
+                        
+                        // Mostra dashboard utente e nascondi admin info
+                        const userDash = document.getElementById('user-dashboard');
+                        const adminInfo = document.getElementById('admin-server-info');
+                        if (userDash) userDash.style.display = 'block';
+                        if (adminInfo) adminInfo.style.display = 'none';
+                        
+                        // Carica statistiche utente
+                        if (typeof loadUserDashboardStats === 'function') loadUserDashboardStats();
+                    }
+                })
+                .catch(error => {
+                    console.error('[ERROR] Errore fetch:', error);
+                    // Non fare redirect per errori di connessione - solo per 401
+                });
+        }
+
+        function logout() {
+            if (confirm('Sei sicuro di voler uscire?')) {
+                window.location.href = '/logout';
+            }
+        }
+
+        // Carica statistiche dashboard utente
+        async function loadUserDashboardStats() {
+            try {
+                // Carica statistiche generali
+                const trasferte = await (await fetch('/api/trasferte', { credentials: 'same-origin' })).json();
+                const veicoli = await (await fetch('/api/veicoli', { credentials: 'same-origin' })).json();
+                
+                let totalKm = 0;
+                let totalRimborsi = 0;
+                
+                if (Array.isArray(trasferte)) {
+                    trasferte.forEach(t => {
+                        // Usa 'chilometri' non 'distanza' e 'rimborso' non 'importo_rimborso'
+                        if (t.chilometri) totalKm += parseFloat(t.chilometri) || 0;
+                        if (t.rimborso) totalRimborsi += parseFloat(t.rimborso) || 0;
+                    });
+                }
+                
+                document.getElementById('user-stat-trasferte').textContent = Array.isArray(trasferte) ? trasferte.length : 0;
+                document.getElementById('user-stat-veicoli').textContent = Array.isArray(veicoli) ? veicoli.length : 0;
+                document.getElementById('user-stat-km').textContent = Math.round(totalKm);
+                document.getElementById('user-stat-rimborsi').textContent = '€' + totalRimborsi.toFixed(2);
+                
+                console.log('[DASHBOARD] Statistiche caricate:', { trasferte: trasferte.length, veicoli: veicoli.length, km: totalKm, rimborsi: totalRimborsi });
+            } catch (error) {
+                console.error('[ERROR] Errore caricamento statistiche:', error);
+            }
+        }
+
+        async function loadAdminServerStats() {
+            try {
+                // Carica dati utenti
+                const usersResponse = await fetch('/api/admin/users', { credentials: 'same-origin' });
+                const usersData = await usersResponse.json();
+                document.getElementById('stat-total-users').textContent = Array.isArray(usersData) ? usersData.length : 0;
+
+                // Carica dati veicoli
+                const vehiclesResponse = await fetch('/api/veicoli', { credentials: 'same-origin' });
+                const vehiclesData = await vehiclesResponse.json();
+                const totalVehicles = Array.isArray(vehiclesData) ? vehiclesData.length : (vehiclesData.items ? vehiclesData.items.length : 0);
+                document.getElementById('stat-total-vehicles').textContent = totalVehicles;
+
+                // Carica dati trasferte
+                const trasferteResponse = await fetch('/api/trasferte', { credentials: 'same-origin' });
+                const trasferteData = await trasferteResponse.json();
+                const totalTrasferte = Array.isArray(trasferteData) ? trasferteData.length : (trasferteData.items ? trasferteData.items.length : 0);
+                document.getElementById('stat-total-trasferte').textContent = totalTrasferte;
+
+                // Carica dati clienti
+                const clientiResponse = await fetch('/api/clienti', { credentials: 'same-origin' });
+                const clientiData = await clientiResponse.json();
+                const totalClienti = Array.isArray(clientiData) ? clientiData.length : (clientiData.items ? clientiData.items.length : 0);
+                document.getElementById('stat-total-clienti').textContent = totalClienti;
+
+                // Carica dati indirizzi
+                const indirizziResponse = await fetch('/api/indirizzi-aziendali', { credentials: 'same-origin' });
+                const indirizziData = await indirizziResponse.json();
+                const totalIndirizzi = Array.isArray(indirizziData) ? indirizziData.length : (indirizziData.items ? indirizziData.items.length : 0);
+                document.getElementById('stat-total-indirizzi').textContent = totalIndirizzi;
+
+                // Calcola statistiche
+                let totalKm = 0;
+                let totalReimbursement = 0;
+                if (Array.isArray(trasferteData)) {
+                    trasferteData.forEach(t => {
+                        totalKm += parseFloat(t.km) || 0;
+                        totalReimbursement += parseFloat(t.importo) || 0;
+                    });
+                }
+                document.getElementById('stat-total-km').textContent = totalKm.toFixed(0);
+                document.getElementById('stat-total-reimbursement').textContent = '€ ' + totalReimbursement.toFixed(2);
+
+                // Carica info database
+                const dbInfoResponse = await fetch('/api/admin/db-info', { credentials: 'same-origin' });
+                if (dbInfoResponse.ok) {
+                    const dbInfo = await dbInfoResponse.json();
+                    document.getElementById('stat-db-size').textContent = dbInfo.db_size || '-';
+                    document.getElementById('stat-server-version').textContent = dbInfo.server_version || 'Flask';
+                }
+
+                // Carica info backup
+                const backupResponse = await fetch('/api/backup/list', { credentials: 'same-origin' });
+                if (backupResponse.ok) {
+                    const backupData = await backupResponse.json();
+                    if (backupData.backups && backupData.backups.length > 0) {
+                        const lastBackup = backupData.backups[0];
+                        document.getElementById('stat-last-backup').textContent = lastBackup.timestamp || '-';
+                        const totalBackupSpace = backupData.backups.reduce((sum, b) => sum + parseFloat(b.size_mb || 0), 0);
+                        document.getElementById('stat-backup-space').textContent = totalBackupSpace.toFixed(2) + ' MB';
+                    } else {
+                        document.getElementById('stat-last-backup').textContent = 'Nessuno';
+                        document.getElementById('stat-backup-space').textContent = '0 MB';
+                    }
+                }
+
+                // Uptime (calcolo approssimativo da import time del server)
+                const startTime = new Date().getTime();
+                document.getElementById('stat-uptime').textContent = '✓ Online';
+
+                // Carica info Docker
+                await loadDockerInfo();
+
+            } catch (error) {
+                console.error('Errore caricamento stats:', error);
+                // Imposta valori predefiniti in caso di errore
+                ['stat-total-users', 'stat-total-vehicles', 'stat-total-trasferte', 'stat-db-size',
+                 'stat-total-reimbursement', 'stat-total-km', 'stat-last-backup', 'stat-backup-space',
+                 'stat-server-version', 'stat-uptime', 'stat-total-clienti', 'stat-total-indirizzi'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = '-';
+                });
+            }
+        }
+
+        async function loadDockerInfo() {
+            try {
+                const response = await fetch('/api/docker-info', { credentials: 'same-origin' });
+                if (response.ok) {
+                    const dockerInfo = await response.json();
+                    // Mostra la sezione Docker info
+                    document.getElementById('docker-info-section').style.display = 'block';
+                    // Popola i campi
+                    document.getElementById('docker-container-id').textContent = dockerInfo.container_id || '-';
+                    document.getElementById('docker-image').textContent = dockerInfo.image || '-';
+                    document.getElementById('docker-port').textContent = dockerInfo.port || '-';
+                    document.getElementById('docker-container-name').textContent = dockerInfo.container_name || '-';
+                } else {
+                    // Nascondi la sezione se non in Docker
+                    document.getElementById('docker-info-section').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Errore caricamento Docker info:', error);
+                document.getElementById('docker-info-section').style.display = 'none';
+            }
+        }
+
+        function getCsrfToken() {
+            // Prova a ottenere il CSRF token dal DOM o dalla sessione
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            return meta ? meta.getAttribute('content') : '';
+        }
+
+        // Esegui setup quando il DOM è pronto
+        document.addEventListener('DOMContentLoaded', setupMenuVisibility);
+    </script>
+
+    <script src="{{ url_for('static', filename='js/accessibility.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

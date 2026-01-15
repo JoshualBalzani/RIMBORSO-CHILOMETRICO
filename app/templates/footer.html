@@ -1,0 +1,66 @@
+<!-- Global Footer with Company Info -->
+<footer class="global-footer" id="globalFooter">
+    <div class="container">
+        <!-- Company Info Section -->
+        <div class="footer-company-section">
+            <div class="footer-company-info" id="footerCompanySection" style="display: none;">
+                <h4 id="footer-company-name">Rimborso KM</h4>
+                <div id="footer-company-details">
+                    <p id="footer-company-address" style="display: none;">📍 <span id="footer-company-address-text"></span></p>
+                    <p id="footer-company-phone" style="display: none;">📞 <span id="footer-company-phone-text"></span></p>
+                    <p id="footer-company-email" style="display: none;">✉️ <span id="footer-company-email-text"></span></p>
+                </div>
+            </div>
+            <div id="footerDefaultSection" class="footer-default-info">
+                <h4>Rimborso KM</h4>
+                <p>Sistema di gestione trasferte e rimborsi chilometrici</p>
+            </div>
+        </div>
+
+        <!-- Copyright Section -->
+        <div class="footer-copyright-section">
+            <p>© 2026 Rimborso KM - All rights reserved</p>
+            <p class="footer-credit">Sviluppato con <span style="color: var(--color-danger);">♥</span> da <strong>Joshua Balzani</strong></p>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Carica dati aziendali nel footer
+    async function loadCompanyInfoFooter() {
+        try {
+            const response = await fetch('/api/dati-aziendali', { credentials: 'same-origin' });
+            if (!response.ok) return;
+            
+            const dati = await response.json();
+            
+            // Se ci sono dati aziendali, mostra la sezione
+            if (dati && dati.nome_azienda) {
+                document.getElementById('footer-company-name').textContent = dati.nome_azienda;
+                
+                if (dati.indirizzo_principale) {
+                    document.getElementById('footer-company-address-text').textContent = dati.indirizzo_principale;
+                    document.getElementById('footer-company-address').style.display = 'block';
+                }
+                
+                if (dati.telefono) {
+                    document.getElementById('footer-company-phone-text').textContent = dati.telefono;
+                    document.getElementById('footer-company-phone').style.display = 'block';
+                }
+                
+                if (dati.email) {
+                    document.getElementById('footer-company-email-text').textContent = dati.email;
+                    document.getElementById('footer-company-email').style.display = 'block';
+                }
+                
+                document.getElementById('footerCompanySection').style.display = 'block';
+                document.getElementById('footerDefaultSection').style.display = 'none';
+            }
+        } catch (error) {
+            console.error('[ERROR] Errore caricamento dati aziendali nel footer:', error);
+        }
+    }
+
+    // Carica al caricamento della pagina
+    window.addEventListener('load', loadCompanyInfoFooter);
+</script>

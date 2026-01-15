@@ -1,0 +1,20 @@
+# Core
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+SQLAlchemy==2.0.45
+
+# HTTP
+requests==2.32.3
+
+# Export: Excel, CSV, PDF
+openpyxl==3.1.5  # Excel export
+reportlab==4.0.9  # PDF export (REQUIRED)
+python-dotenv==1.0.1
+Werkzeug==3.0.4
+
+# Scheduler
+APScheduler==3.10.4  # Backup automatici
+
+# 2FA
+pyotp==2.9.0  # TOTP per autenticazione a due fattori
+qrcode==7.4.2  # QR code generation

@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trasferte - Rimborso KM</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Rimborso KM" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script>
+        // Crea il modal di logout subito, indipendente da app.js
+        (function() {
+            function initLogoutModal() {
+                if (!document.getElementById('logoutModal') && document.body) {
+                    const modal = document.createElement('div');
+                    modal.id = 'logoutModal';
+                    modal.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: rgba(0, 0, 0, 0.5);
+                        opacity: 0;
+                        pointer-events: none;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 99999;
+                        transition: opacity 0.2s ease;
+                    `;
+                    modal.innerHTML = `<div style="background: white; border-radius: 12px; padding: 32px; max-width: 400px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); text-align: center;"><h2 style="margin-top: 0; margin-bottom: 8px; color: #333;">Conferma Uscita</h2><p style="margin: 0 0 24px 0; color: #666; font-size: 14px;">Sei sicuro di voler uscire?</p><div style="display: flex; gap: 12px; justify-content: center;"><button id="logoutCancel" style="padding: 10px 24px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-weight: 500; color: #333;">Annulla</button><button id="logoutConfirm" style="padding: 10px 24px; background: #ff3b30; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Esci</button></div></div>`;
+                    document.body.appendChild(modal);
+                    
+                    document.getElementById('logoutCancel').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        modal.style.opacity = '0';
+                        modal.style.pointerEvents = 'none';
+                    });
+                    
+                    document.getElementById('logoutConfirm').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        window.location.href = '/logout';
+                    });
+                    
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            modal.style.opacity = '0';
+                            modal.style.pointerEvents = 'none';
+                        }
+                    });
+                } else if (!document.body) {
+                    setTimeout(initLogoutModal, 100);
+                }
+            }
+            window.logout = function() {
+                const modal = document.getElementById('logoutModal');
+                if (modal) {
+                    modal.style.opacity = '1';
+                    modal.style.pointerEvents = 'auto';
+                } else {
+                    initLogoutModal();
+                    setTimeout(() => {
+                        const m = document.getElementById('logoutModal');
+                        if (m) {
+                            m.style.opacity = '1';
+                            m.style.pointerEvents = 'auto';
+                        }
+                    }, 50);
+                }
+            };
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initLogoutModal);
+            } else {
+                initLogoutModal();
+            }
+        })();
+    </script>
+    <style>
+        .form-section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-section h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #0071e3;
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+        }
+
+        .address-fieldset {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 16px;
+            margin-bottom: 16px;
+            grid-column: 1 / -1;
+        }
+
+        .address-fieldset legend {
+            padding: 0 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .address-fieldset > div {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .address-preview {
+            padding: 12px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 8px 0 0 0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .address-preview:empty {
+            display: none;
+        }
+
+        .label-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        .label-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .btn-calcolo {
+            background: white;
+            color: #333;
+            border: 1px solid #ddd;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-calcolo:hover {
+            background: #f9f9f9;
+            border-color: #999;
+        }
+
+        .label-rimborso {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #rimborso-stimato {
+            font-size: 18px;
+            color: #34c759;
+            font-weight: 700;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            grid-column: 1 / -1;
+            margin-top: 16px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            flex: 1;
+            background: white;
+            color: #333;
+        }
+
+        .btn:hover {
+            background: #f9f9f9;
+            border-color: #999;
+        }
+
+        .btn.primary {
+            background: white;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn.primary:hover {
+            background: #f9f9f9;
+            border-color: #999;
+        }
+
+        .btn.secondary {
+            background: white;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn.secondary:hover {
+            background: #f9f9f9;
+            border-color: #999;
+        }
+
+        .btn.danger {
+            background: white;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn.danger:hover {
+            background: #f9f9f9;
+            border-color: #999;
+        }
+
+        .filter-section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filter-section h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .list-section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 16px;
+        }
+
+        .section-header h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .list-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon-text {
+            padding: 8px 12px;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-icon-text:hover {
+            background: #e8e8e8;
+            border-color: #ccc;
+        }
+
+        .trips-table {
+            overflow-x: auto;
+        }
+
+        .trips-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .trips-table thead {
+            background: #f9f9f9;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .trips-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .trips-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+
+        .trips-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .trips-table .trip-action {
+            display: flex;
+            gap: 6px;
+        }
+
+        .trips-table .btn-edit,
+        .trips-table .btn-delete {
+            padding: 6px 10px;
+            background: none;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .trips-table .btn-edit {
+            color: #667eea;
+            border-color: #667eea;
+        }
+
+        .trips-table .btn-edit:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .trips-table .btn-delete {
+            color: #f44336;
+            border-color: #f44336;
+        }
+
+        .trips-table .btn-delete:hover {
+            background: #f44336;
+            color: white;
+        }
+
+        dialog {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 600px;
+            padding: 0;
+            inset: 0;
+            margin: auto;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        dialog::backdrop {
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            padding: 24px;
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .modal-close {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .trips-table {
+                font-size: 12px;
+            }
+
+            .trips-table th,
+            .trips-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="skip-to-content">Salta al contenuto principale</a>
+
+    <!-- Navigation - Top Bar (Desktop Only) -->
+    <nav class="navbar" role="navigation" aria-label="Navigazione principale">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <img src="/web-app-manifest-512x512.png" alt="Rimborso KM" class="logo-icon" />
+                <span class="logo-text">Rimborso KM</span>
+            </div>
+            <div class="navbar-user">
+                <div class="navbar-avatar" id="navbar-avatar" onclick="toggleUserMenu(event)">JB</div>
+                <span class="navbar-username" id="navbar-username" onclick="toggleUserMenu(event)">Utente</span>
+                
+                <!-- User Dropdown Menu -->
+                <div class="user-dropdown-menu" id="user-dropdown-menu">
+                    <div class="user-dropdown-header">
+                        <div class="user-dropdown-avatar" id="dropdown-avatar">JB</div>
+                        <div>
+                            <div class="user-dropdown-name" id="dropdown-name">Utente</div>
+                            <div class="user-dropdown-role" id="dropdown-role">User</div>
+                        </div>
+                    </div>
+                    <div class="user-dropdown-divider"></div>
+                    <div class="user-dropdown-mobile-items">
+                        <a href="/veicoli" class="user-dropdown-item">🚙 Veicoli</a>
+                        <a href="/clienti" class="user-dropdown-item">👔 Clienti</a>
+                        <a href="/indirizzi-aziendali" class="user-dropdown-item">📍 Indirizzi</a>
+                    </div>
+                    <div class="user-dropdown-divider"></div>
+                    <a href="/impostazioni" class="user-dropdown-item">⚙️ Impostazioni</a>
+                    <a href="#" onclick="logout(); return false;" class="user-dropdown-item">🚪 Esci</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav" role="navigation" aria-label="Navigazione">
+        <ul>
+            <li><a href="/" class="nav-link" data-page="dashboard" title="Dashboard"><span class="icon">📊</span><span>Dashboard</span></a></li>
+            <li id="menu-trasferte"><a href="/trasferte" class="nav-link active" data-page="trasferte" title="Trasferte"><span class="icon">🚗</span><span>Trasferte</span></a></li>
+            <li id="menu-archivio"><a href="/archivio" class="nav-link" data-page="archivio" title="Archivio"><span class="icon">📁</span><span>Archivio</span></a></li>
+            <li id="menu-veicoli"><a href="/veicoli" class="nav-link" data-page="veicoli" title="Veicoli"><span class="icon">🚙</span><span>Veicoli</span></a></li>
+            <li id="menu-clienti"><a href="/clienti" class="nav-link" data-page="clienti" title="Clienti"><span class="icon">👔</span><span>Clienti</span></a></li>
+            <li id="menu-indirizzi"><a href="/indirizzi-aziendali" class="nav-link" data-page="indirizzi" title="Indirizzi"><span class="icon">📍</span><span>Indirizzi</span></a></li>
+            <li id="admin-menu-item" style="display: none;"><a href="/impostazioni-utenti" class="nav-link" data-page="utenti" title="Utenti" onclick="window.location.href='/impostazioni-utenti'; return false;"><span class="icon">👥</span><span>Utenti</span></a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container" id="main-content">
+        <header class="page-header">
+            <h1>Trasferte</h1>
+            <p class="subtitle">Gestione viaggi e rimborsi</p>
+        </header>
+
+        <!-- Form Inserimento -->
+        <section class="form-section">
+            <h2>Inserisci Nuova Trasferta</h2>
+            <form id="form-trasferta" class="form-grid">
+                <div class="form-group">
+                    <label for="trasferta-data">Data *</label>
+                    <input type="date" id="trasferta-data" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="trasferta-veicolo">Veicolo *</label>
+                    <select id="trasferta-veicolo" required>
+                        <option value="">-- Seleziona veicolo --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="trasferta-indirizzo-aziendale">Indirizzo Partenza (da lista) <small>(facoltativo)</small></label>
+                    <select id="trasferta-indirizzo-aziendale" onchange="autocompletaPartenza()">
+                        <option value="">-- Seleziona dalla lista oppure compila manualmente --</option>
+                    </select>
+                    <input type="hidden" id="trasferta-indirizzo-aziendale-nome">
+                </div>
+
+                <div class="form-group">
+                    <label for="trasferta-cliente">Cliente Destinatario (da lista) <small>(facoltativo)</small></label>
+                    <select id="trasferta-cliente" onchange="autocompletaArrivo()">
+                        <option value="">-- Seleziona dalla lista oppure compila manualmente --</option>
+                    </select>
+                    <input type="hidden" id="trasferta-cliente-nome">
+                </div>
+
+                <!-- AUTOCOMPLETE PARTENZA -->
+                <div class="form-group">
+                    <label for="trasferta-partenza">🔍 Ricerca Indirizzo Partenza</label>
+                    <input type="text" id="trasferta-partenza" placeholder="Scrivi un indirizzo (Via, Città)..." autocomplete="off">
+                    <div id="autocomplete-partenza" class="autocomplete-list"></div>
+                </div>
+
+                <!-- INDIRIZZO PARTENZA -->
+                <fieldset class="address-fieldset">
+                    <legend>📍 Luogo di Partenza</legend>
+                    <div>
+                        <div class="form-group">
+                            <label for="trasferta-via-partenza">Via/Piazza *</label>
+                            <input type="text" id="trasferta-via-partenza" placeholder="Es: Via Roma 123" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="trasferta-citta-partenza">Città *</label>
+                            <input type="text" id="trasferta-citta-partenza" placeholder="Es: Milano" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="trasferta-cap-partenza">CAP *</label>
+                            <input type="text" id="trasferta-cap-partenza" placeholder="Es: 20100" pattern="[0-9]{5}" maxlength="5" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="trasferta-paese-partenza">Paese</label>
+                            <input type="text" id="trasferta-paese-partenza" placeholder="Es: Italia" value="Italia">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- AUTOCOMPLETE ARRIVO -->
+                <div class="form-group">
+                    <label for="trasferta-arrivo">🔍 Ricerca Indirizzo Arrivo</label>
+                    <input type="text" id="trasferta-arrivo" placeholder="Scrivi un indirizzo (Via, Città)..." autocomplete="off">
+                    <div id="autocomplete-arrivo" class="autocomplete-list"></div>
+                </div>
+
+                <!-- INDIRIZZO ARRIVO -->
+                <fieldset class="address-fieldset">
+                    <legend>📍 Luogo di Arrivo</legend>
+                    <div>
+                        <div class="form-group">
+                            <label for="trasferta-via-arrivo">Via/Piazza *</label>
+                            <input type="text" id="trasferta-via-arrivo" placeholder="Es: Via Torino 456" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="trasferta-citta-arrivo">Città *</label>
+                            <input type="text" id="trasferta-citta-arrivo" placeholder="Es: Torino" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="trasferta-cap-arrivo">CAP *</label>
+                            <input type="text" id="trasferta-cap-arrivo" placeholder="Es: 10100" pattern="[0-9]{5}" maxlength="5" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="trasferta-paese-arrivo">Paese</label>
+                            <input type="text" id="trasferta-paese-arrivo" placeholder="Es: Italia" value="Italia">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="form-group">
+                    <label for="trasferta-km">Chilometri *</label>
+                    <input type="number" id="trasferta-km" step="0.01" min="0" placeholder="0.00" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="label-checkbox">
+                        <input type="checkbox" id="trasferta-andata-ritorno">
+                        <span>Andata e Ritorno</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="trasferta-motivo">Motivo *</label>
+                    <select id="trasferta-motivo" required>
+                        <option value="">-- Seleziona motivo --</option>
+                    </select>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="trasferta-note">Note</label>
+                    <textarea id="trasferta-note" rows="3" placeholder="Note aggiuntive..."></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="trasferta-allegato">📎 Allegato (max 10 MB)</label>
+                    <input type="file" id="trasferta-allegato" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.gif,.zip,.rar">
+                    <small style="color: #666; display: block; margin-top: 6px;">Formati consentiti: PDF, Word, Excel, TXT, Immagini (JPG, PNG, GIF), ZIP, RAR</small>
+                    <div id="allegato-preview" style="margin-top: 12px; padding: 12px; background: #f5f5f5; border-radius: 4px; display: none;">
+                        <span id="allegato-preview-text"></span>
+                        <button type="button" id="btn-rimuovi-allegato" class="btn secondary" style="margin-left: 12px; padding: 4px 8px; font-size: 12px;">Rimuovi</button>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label class="label-rimborso">
+                        Rimborso Stimato: <span id="rimborso-stimato">€ 0,00</span>
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="btn-calcola-distanza" class="btn-calcolo">
+                        📍 Calcola Distanza
+                    </button>
+                    <button type="submit" class="btn primary">Salva Trasferta</button>
+                    <button type="reset" class="btn secondary">Resetta</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Filtri -->
+        <section class="filter-section">
+            <h2>Archivio Trasferte</h2>
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Da Data</label>
+                    <input type="date" id="filter-data-inizio">
+                </div>
+                <div class="filter-group">
+                    <label>A Data</label>
+                    <input type="date" id="filter-data-fine">
+                </div>
+                <div class="filter-group">
+                    <label>Veicolo</label>
+                    <select id="filter-veicolo">
+                        <option value="">-- Tutti --</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Motivo</label>
+                    <input type="text" id="filter-motivo" placeholder="Cerca motivo...">
+                </div>
+                <button id="btn-applica-filtri" class="btn primary">Filtra</button>
+                <button id="btn-reset-filtri" class="btn secondary">Resetta</button>
+            </div>
+        </section>
+
+        <!-- Lista Trasferte -->
+        <section class="list-section">
+            <div class="section-header">
+                <h3>Risultati (<span id="count-trasferte">0</span>)</h3>
+                <div class="list-actions">
+                    <button id="btn-export-excel" class="btn-icon-text">📥 Excel</button>
+                    <button id="btn-export-csv" class="btn-icon-text">📄 CSV</button>
+                    <button id="btn-export-pdf" class="btn-icon-text">📋 PDF</button>
+                </div>
+            </div>
+
+            <div id="trasferte-list" class="trips-table">
+                <!-- Populated by JavaScript -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Edit Trasferta -->
+    <dialog id="editTrasfertaModal">
+        <div class="modal-content">
+            <h2>Modifica Trasferta</h2>
+            <form id="form-edit-trasferta" class="form-grid">
+                <input type="hidden" id="edit-trasferta-id">
+
+                <div class="form-group">
+                    <label for="edit-trasferta-data">Data *</label>
+                    <input type="date" id="edit-trasferta-data" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-trasferta-veicolo">Veicolo *</label>
+                    <select id="edit-trasferta-veicolo" required></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-trasferta-indirizzo-aziendale">Indirizzo Partenza (da lista) <small>(facoltativo)</small></label>
+                    <select id="edit-trasferta-indirizzo-aziendale" onchange="autocompletaPartenzaEdit()">
+                        <option value="">-- Seleziona dalla lista oppure compila manualmente --</option>
+                    </select>
+                    <input type="hidden" id="edit-trasferta-indirizzo-aziendale-nome">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-trasferta-cliente">Cliente Destinatario (da lista) <small>(facoltativo)</small></label>
+                    <select id="edit-trasferta-cliente" onchange="autocompletaArrivoEdit()">
+                        <option value="">-- Seleziona dalla lista oppure compila manualmente --</option>
+                    </select>
+                    <input type="hidden" id="edit-trasferta-cliente-nome">
+                </div>
+
+                <!-- AUTOCOMPLETE PARTENZA -->
+                <div class="form-group">
+                    <label for="edit-trasferta-partenza">🔍 Ricerca Indirizzo Partenza</label>
+                    <input type="text" id="edit-trasferta-partenza" placeholder="Scrivi un indirizzo (Via, Città)..." autocomplete="off">
+                    <div id="autocomplete-edit-partenza" class="autocomplete-list"></div>
+                </div>
+
+                <!-- INDIRIZZO PARTENZA -->
+                <fieldset class="address-fieldset">
+                    <legend>📍 Luogo di Partenza</legend>
+                    <div>
+                        <div class="form-group">
+                            <label for="edit-trasferta-via-partenza">Via/Piazza *</label>
+                            <input type="text" id="edit-trasferta-via-partenza" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-trasferta-citta-partenza">Città *</label>
+                            <input type="text" id="edit-trasferta-citta-partenza" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-trasferta-cap-partenza">CAP *</label>
+                            <input type="text" id="edit-trasferta-cap-partenza" pattern="[0-9]{5}" maxlength="5" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-trasferta-paese-partenza">Paese</label>
+                            <input type="text" id="edit-trasferta-paese-partenza" value="Italia">
+                        </div>
+                    </div>
+                </fieldset>
+                <!-- AUTOCOMPLETE ARRIVO -->
+                <div class="form-group">
+                    <label for="edit-trasferta-arrivo">🔍 Ricerca Indirizzo Arrivo</label>
+                    <input type="text" id="edit-trasferta-arrivo" placeholder="Scrivi un indirizzo (Via, Città)..." autocomplete="off">
+                    <div id="autocomplete-edit-arrivo" class="autocomplete-list"></div>
+                </div>
+
+                <!-- INDIRIZZO ARRIVO -->
+                <fieldset class="address-fieldset">
+                    <legend>📍 Luogo di Arrivo</legend>
+                    <div>
+                        <div class="form-group">
+                            <label for="edit-trasferta-via-arrivo">Via/Piazza *</label>
+                            <input type="text" id="edit-trasferta-via-arrivo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-trasferta-citta-arrivo">Città *</label>
+                            <input type="text" id="edit-trasferta-citta-arrivo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-trasferta-cap-arrivo">CAP *</label>
+                            <input type="text" id="edit-trasferta-cap-arrivo" pattern="[0-9]{5}" maxlength="5" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-trasferta-paese-arrivo">Paese</label>
+                            <input type="text" id="edit-trasferta-paese-arrivo" value="Italia">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="form-group">
+                    <label for="edit-trasferta-km">Chilometri *</label>
+                    <input type="number" id="edit-trasferta-km" step="0.01" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="label-checkbox">
+                        <input type="checkbox" id="edit-trasferta-andata-ritorno">
+                        <span>Andata e Ritorno</span>
+                    </label>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="edit-trasferta-motivo">Motivo *</label>
+                    <select id="edit-trasferta-motivo" required></select>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="edit-trasferta-note">Note</label>
+                    <textarea id="edit-trasferta-note" rows="3"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn primary">Salva Modifiche</button>
+                    <button type="button" class="btn danger" id="btn-delete-trasferta">Elimina</button>
+                    <button type="button" class="btn secondary" id="btn-cancel-edit">Annulla</button>
+                </div>
+            </form>
+        </div>
+    </dialog>
+
+    <script src="{{ url_for('static', filename='js/accessibility.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/address-autocomplete.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/trasferte.js') }}"></script>
+
+    <script>
+        // Funzione logout globale
+        function logout() {
+            if (confirm('Sei sicuro di voler uscire?')) {
+                window.location.href = '/logout';
+            }
+        }
+
+        function toggleMobileMenu() {
+            const navMenu = document.getElementById('navMenu');
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            navMenu.classList.toggle('active');
+            hamburgerBtn.classList.toggle('active');
+        }
+
+        // Chiudi menu quando clicchi su un link
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('navMenu').classList.remove('active');
+                document.getElementById('hamburgerBtn').classList.remove('active');
+            });
+        });
+
+        // Chiudi menu quando ridimensioni la finestra
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                document.getElementById('navMenu').classList.remove('active');
+                document.getElementById('hamburgerBtn').classList.remove('active');
+            }
+        });
+
+        // Carica nome utente corrente
+        fetch('/api/auth/user', { credentials: 'same-origin' })
+            .then(response => response.json())
+            .then(user => {
+                const usernameEl = document.getElementById('currentUsername');
+                if (usernameEl && user) {
+                    if (user.nome_completo) {
+                        usernameEl.textContent = user.nome_completo;
+                    } else if (user.username) {
+                        usernameEl.textContent = user.username;
+                    }
+                }
+            })
+            .catch(error => console.error('Error loading user:', error));
+        
+        // Setup bottom menu visibility based on user role
+        setupMenuVisibility();
+    </script>
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - RIMBORSO KM</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Rimborso KM" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f9fafb 0%, #eff2f5 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            max-width: 1200px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .login-left {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .company-showcase {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+        }
+
+        .company-showcase h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+        }
+
+        .company-info-item {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .company-info-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .company-info-icon {
+            font-size: 20px;
+            min-width: 24px;
+        }
+
+        .company-info-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .company-info-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #888888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .company-info-value {
+            font-size: 14px;
+            color: #1a1a1a;
+            margin-top: 4px;
+            word-break: break-word;
+        }
+
+        .company-default {
+            text-align: center;
+            color: #888888;
+            font-size: 14px;
+            padding: 20px 0;
+        }
+
+        .login-right {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-logo {
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-logo img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+
+        .login-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            font-size: 14px;
+            color: #666666;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a1a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: #f9fafb;
+        }
+
+        .form-group input::placeholder {
+            color: #999999;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #0071e3;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #0071e3 0%, #0064c8 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 113, 227, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .alert {
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .alert-error {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+
+        .alert-info {
+            background: #e7f3ff;
+            color: #004085;
+            border: 1px solid #b3d9ff;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 12px;
+            color: #888888;
+        }
+
+        .caps-lock-warning {
+            display: none;
+            padding: 8px 12px;
+            margin-top: 6px;
+            background: #fff3cd;
+            color: #856404;
+            border-radius: 6px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        @media (max-width: 1024px) {
+            .login-wrapper {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .login-left {
+                order: 1;
+            }
+
+            .login-right {
+                order: 2;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .login-wrapper {
+                gap: 20px;
+            }
+
+            .login-card,
+            .company-showcase {
+                padding: 24px;
+            }
+
+            .login-header h1 {
+                font-size: 24px;
+            }
+
+            .login-logo {
+                font-size: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-wrapper">
+        <!-- Left side: Branding & Company Info -->
+        <div class="login-left">
+            <div class="company-showcase">
+                <div style="text-align: center; margin-bottom: 32px;">
+                    <div class="login-logo">
+                        <img src="/web-app-manifest-512x512.png" alt="Rimborso KM" class="logo-icon" />
+                    </div>
+                    <h2 style="font-size: 28px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px;">Rimborso KM</h2>
+                    <p style="font-size: 14px; color: #666666;">Sistema di gestione trasferte e rimborsi chilometrici</p>
+                </div>
+
+                <div id="companyDetails" style="display: none; border-top: 1px solid #e5e7eb; padding-top: 24px; margin-top: 24px;"></div>
+            </div>
+        </div>
+
+        <!-- Right side: Login Form -->
+        <div class="login-right">
+            <div class="login-card">
+                <div class="login-header">
+                    <h1>Accedi</h1>
+                    <p>Inserisci le tue credenziali</p>
+                </div>
+
+                {% if error %}
+                <div class="alert alert-error">
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                {% if request.args.get('expired') %}
+                <div class="alert alert-info">
+                    ⏱️ La tua sessione è scaduta per inattività. Accedi di nuovo per continuare.
+                </div>
+                {% endif %}
+
+                {% if is_locked %}
+                <div class="alert alert-info">
+                    🔒 Troppi tentativi di accesso. Per favore attendi alcuni minuti prima di riprovare.
+                </div>
+                {% endif %}
+
+                <form method="POST" class="login-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            placeholder="Inserisci il tuo username"
+                            required
+                            autocomplete="username"
+                            autofocus
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            placeholder="Inserisci la tua password"
+                            required
+                            autocomplete="current-password"
+                            onkeydown="checkCapsLock(event)"
+                            onkeyup="checkCapsLock(event)"
+                        >
+                        <div class="caps-lock-warning" id="capsLockWarning">
+                            ⚠️ Blocco Maiuscole attivo
+                        </div>
+                    </div>
+
+                    <button type="submit" class="login-btn">Accedi</button>
+                </form>
+
+                <div class="login-footer">
+                    <p><a href="{{ url_for('forgot_password') }}" style="color: #0071e3; text-decoration: none; font-weight: 500;">Hai dimenticato la password?</a></p>
+                    <p style="margin-top: 12px; border-top: 1px solid #e5e7eb; padding-top: 12px;">&copy; 2026 Rimborso KM - Tutti i diritti riservati</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkCapsLock(event) {
+            const capsLockOn = event.getModifierState && event.getModifierState('CapsLock');
+            const warning = document.getElementById('capsLockWarning');
+            
+            if (capsLockOn) {
+                warning.style.display = 'block';
+            } else {
+                warning.style.display = 'none';
+            }
+        }
+
+        // Carica dati aziendali globali (endpoint pubblico)
+        async function loadCompanyData() {
+            try {
+                const response = await fetch('/api/dati-aziendali-public');
+                if (!response.ok) return;
+                
+                const dati = await response.json();
+                
+                if (!dati || !dati.nome_azienda) return;
+                
+                const companyDetails = document.getElementById('companyDetails');
+                
+                let detailsHtml = `<h3 style="font-size: 18px; font-weight: 700; color: #1a1a1a; margin-bottom: 20px;">${dati.nome_azienda}</h3>`;
+                
+                if (dati.indirizzo_principale) {
+                    detailsHtml += `
+                        <div class="company-info-item">
+                            <div class="company-info-icon">📍</div>
+                            <div class="company-info-content">
+                                <div class="company-info-label">Indirizzo</div>
+                                <div class="company-info-value">${dati.indirizzo_principale}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                if (dati.telefono) {
+                    detailsHtml += `
+                        <div class="company-info-item">
+                            <div class="company-info-icon">📞</div>
+                            <div class="company-info-content">
+                                <div class="company-info-label">Telefono</div>
+                                <div class="company-info-value">${dati.telefono}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                if (dati.email) {
+                    detailsHtml += `
+                        <div class="company-info-item">
+                            <div class="company-info-icon">📧</div>
+                            <div class="company-info-content">
+                                <div class="company-info-label">Email</div>
+                                <div class="company-info-value">${dati.email}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                if (dati.partita_iva) {
+                    detailsHtml += `
+                        <div class="company-info-item">
+                            <div class="company-info-icon">🏢</div>
+                            <div class="company-info-content">
+                                <div class="company-info-label">P.IVA</div>
+                                <div class="company-info-value">${dati.partita_iva}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                if (dati.codice_fiscale) {
+                    detailsHtml += `
+                        <div class="company-info-item">
+                            <div class="company-info-icon">🆔</div>
+                            <div class="company-info-content">
+                                <div class="company-info-label">Codice Fiscale</div>
+                                <div class="company-info-value">${dati.codice_fiscale}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                if (detailsHtml.length > 200) { // Se ci sono dati oltre al titolo
+                    companyDetails.innerHTML = detailsHtml;
+                    companyDetails.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Errore caricamento dati aziendali:', error);
+            }
+        }
+
+        // Focus on username field on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('username').focus();
+            loadCompanyData();
+        });
+    </script>
+</body>
+</html>

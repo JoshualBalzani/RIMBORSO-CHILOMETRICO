@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clienti | Rimborso KM</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Rimborso KM" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .form-section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-section h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #0071e3;
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            grid-column: 1 / -1;
+            margin-top: 16px;
+        }
+
+        .list-section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .list-section h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .btn-aggiungi {
+            padding: 10px 20px;
+            background: white;
+            color: #0071e3;
+            border: 2px solid #0071e3;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .btn-aggiungi:hover {
+            background: #0071e3;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-edit,
+        .btn-delete {
+            padding: 6px 10px;
+            background: none;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn-edit:hover {
+            border-color: #0071e3;
+            color: #0071e3;
+        }
+
+        .btn-delete:hover {
+            border-color: #ff3b30;
+            color: #ff3b30;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+        }
+
+        dialog {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 500px;
+            padding: 0;
+            inset: 0;
+            margin: auto;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        dialog::backdrop {
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            padding: 20px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 12px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #333;
+        }
+
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .autocomplete-container {
+            position: relative;
+        }
+
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            z-index: 10;
+        }
+
+        .autocomplete-list.active {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 13px;
+        }
+
+        .autocomplete-item:hover {
+            background: #f9f9f9;
+        }
+
+        .autocomplete-item small {
+            color: #999;
+            display: block;
+            font-size: 11px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .address-preview {
+            padding: 12px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 8px 0 0 0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .address-preview:empty {
+            display: none;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            padding-top: 12px;
+            border-top: 1px solid #ddd;
+        }
+
+        .btn-cancel,
+        .btn-submit {
+            padding: 10px 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel {
+            background: white;
+            color: #333;
+        }
+
+        .btn-cancel:hover {
+            background: #f9f9f9;
+            border-color: #999;
+        }
+
+        .btn-submit {
+            background: #0071e3;
+            color: white;
+            border-color: #0071e3;
+        }
+
+        .btn-submit:hover {
+            background: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            flex: 1;
+            background: white;
+            color: #333;
+        }
+
+        .btn:hover {
+            background: #f9f9f9;
+            border-color: #999;
+        }
+
+        .btn.primary {
+            background: #0071e3;
+            color: white;
+            border-color: #0071e3;
+        }
+
+        .btn.primary:hover {
+            background: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .btn.secondary {
+            background: white;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn.secondary:hover {
+            background: #f9f9f9;
+            border-color: #999;
+        }
+
+        .error,
+        .success {
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 4px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .error {
+            background: #ffe8e8;
+            color: #c41c00;
+            border-left: 4px solid #ff3b30;
+        }
+
+        .success {
+            background: #e8f4e8;
+            color: #004c0a;
+            border-left: 4px solid #34c759;
+        }
+
+        footer a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            main.container {
+                padding: 12px;
+            }
+
+            .form-section,
+            .list-section {
+                padding: 16px;
+                margin-bottom: 16px;
+                border-radius: 8px;
+            }
+
+            .page-header h1 {
+                font-size: 24px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Tabella responsiva per mobile */
+            table {
+                width: 100%;
+                border: none;
+                border-collapse: collapse;
+            }
+
+            table thead {
+                display: none;
+            }
+
+            table tbody {
+                display: block;
+            }
+
+            table tr {
+                display: block;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                margin-bottom: 12px;
+                padding: 12px;
+                background: white;
+            }
+
+            table td {
+                display: block;
+                padding: 8px 0;
+                border: none;
+                border-bottom: 1px solid #f0f0f0;
+                text-align: left;
+            }
+
+            table td:before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #0071e3;
+                display: inline-block;
+                width: 90px;
+                margin-right: 12px;
+            }
+
+            table td:last-child {
+                border-bottom: none;
+            }
+
+            table tbody tr:hover {
+                background: white;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .btn-edit,
+            .btn-delete {
+                width: 100%;
+                text-align: center;
+                padding: 8px 12px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="skip-to-content">Salta al contenuto principale</a>
+
+    <!-- Navigation - Top Bar (Desktop Only) -->
+    <nav class="navbar" role="navigation" aria-label="Navigazione principale">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <img src="/web-app-manifest-512x512.png" alt="Rimborso KM" class="logo-icon" />
+                <span class="logo-text">Rimborso KM</span>
+            </div>
+            <div class="navbar-user">
+                <div class="navbar-avatar" id="navbar-avatar" onclick="toggleUserMenu(event)">JB</div>
+                <span class="navbar-username" id="navbar-username" onclick="toggleUserMenu(event)">Utente</span>
+                <div class="user-dropdown-menu" id="user-dropdown-menu">
+                    <div class="user-dropdown-header">
+                        <div class="user-dropdown-avatar" id="dropdown-avatar">JB</div>
+                        <div>
+                            <div class="user-dropdown-name" id="dropdown-name">Utente</div>
+                            <div class="user-dropdown-role" id="dropdown-role">User</div>
+                        </div>
+                    </div>
+                    <div class="user-dropdown-divider"></div>
+                    <div class="user-dropdown-mobile-items">
+                        <a href="/veicoli" class="user-dropdown-item">🚙 Veicoli</a>
+                        <a href="/clienti" class="user-dropdown-item">👔 Clienti</a>
+                        <a href="/indirizzi-aziendali" class="user-dropdown-item">📍 Indirizzi</a>
+                    </div>
+                    <div class="user-dropdown-divider"></div>
+                    <a href="/impostazioni" class="user-dropdown-item">⚙️ Impostazioni</a>
+                    <a href="#" onclick="logout(); return false;" class="user-dropdown-item">🚪 Esci</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav" role="navigation" aria-label="Navigazione">
+        <ul>
+            <li><a href="/" class="nav-link" data-page="dashboard" title="Dashboard"><span class="icon">📊</span><span>Dashboard</span></a></li>
+            <li id="menu-trasferte"><a href="/trasferte" class="nav-link" data-page="trasferte" title="Trasferte"><span class="icon">🚗</span><span>Trasferte</span></a></li>
+            <li id="menu-archivio"><a href="/archivio" class="nav-link" data-page="archivio" title="Archivio"><span class="icon">📁</span><span>Archivio</span></a></li>
+            <li id="menu-veicoli"><a href="/veicoli" class="nav-link" data-page="veicoli" title="Veicoli"><span class="icon">🚙</span><span>Veicoli</span></a></li>
+            <li id="menu-clienti"><a href="/clienti" class="nav-link active" data-page="clienti" title="Clienti"><span class="icon">👔</span><span>Clienti</span></a></li>
+            <li id="menu-indirizzi"><a href="/indirizzi-aziendali" class="nav-link" data-page="indirizzi" title="Indirizzi"><span class="icon">📍</span><span>Indirizzi</span></a></li>
+            <li id="admin-menu-item" style="display: none;"><a href="/impostazioni-utenti" class="nav-link" data-page="utenti" title="Utenti" onclick="window.location.href='/impostazioni-utenti'; return false;"><span class="icon">👥</span><span>Utenti</span></a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <header class="page-header">
+            <h1>Gestione Clienti</h1>
+            <p class="subtitle">Aggiungi, modifica ed elimina i tuoi clienti</p>
+        </header>
+        
+        <div id="successMessage" class="success"></div>
+        <div id="errorMessage" class="error"></div>
+
+        <!-- Form Inserimento -->
+        <section class="form-section">
+            <h2>Aggiungi Nuovo Cliente</h2>
+            <form id="clienteForm" class="form-grid" onsubmit="salvaCliente(event)">
+                <div class="form-group">
+                    <label for="nome">Nome Cliente *</label>
+                    <input type="text" id="nome" name="nome" required placeholder="Es: Acme Inc">
+                </div>
+
+                <div class="form-group">
+                    <label for="via">Via *</label>
+                    <div class="autocomplete-container">
+                        <input type="text" id="via" name="via" required placeholder="Es: Via Roma 123" onkeyup="autocompleteVia(event)">
+                        <div id="viaList" class="autocomplete-list"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="citta">Città *</label>
+                    <input type="text" id="citta" name="citta" required placeholder="Es: Milano">
+                </div>
+
+                <div class="form-group">
+                    <label for="cap">CAP *</label>
+                    <input type="text" id="cap" name="cap" required placeholder="Es: 20100" pattern="\d{5}">
+                </div>
+
+                <div class="form-group">
+                    <label for="paese">Paese *</label>
+                    <input type="text" id="paese" name="paese" required placeholder="Es: Italia" value="Italia">
+                </div>
+
+                <div id="formErrorMessage" class="error form-group full-width"></div>
+                <div id="formSuccessMessage" class="success form-group full-width"></div>
+
+                <div id="addressPreview" class="address-preview form-group full-width"></div>
+
+                <div class="form-actions">
+                    <button type="reset" class="btn secondary">Resetta</button>
+                    <button type="submit" class="btn primary">Salva Cliente</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="list-section">
+            <h2>Clienti Registrati</h2>
+            <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+                <button class="btn primary" onclick="downloadTemplateClienti()">📥 Scarica Template CSV</button>
+                <label class="btn primary" style="margin: 0; padding: 10px 20px; cursor: pointer;">
+                    📤 Importa da CSV
+                    <input type="file" id="importFileClienti" accept=".csv,.xlsx,.xls" style="display: none;" onchange="importClienti()">
+                </label>
+            </div>
+            <div class="clienti-table">
+                <table id="clientiTable">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Via</th>
+                            <th>Città</th>
+                            <th>CAP</th>
+                            <th>Paese</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr class="empty-state">
+                            <td colspan="6">Caricamento clienti...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/accessibility.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/address-autocomplete.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/clienti.js') }}"></script>
+
+    <script>
+        let currentClienteId = null;
+        let allClienti = [];
+
+        async function loadClienti() {
+            try {
+                console.log('Loading clienti...');
+                const response = await fetch('/api/clienti');
+                console.log('Response status:', response.status);
+                if (!response.ok) throw new Error('Failed to load clients');
+                allClienti = await response.json();
+                console.log('Clienti loaded:', allClienti);
+                renderClienti();
+            } catch (error) {
+                console.error('Error loading clienti:', error);
+                showError('Errore nel caricamento dei clienti: ' + error.message);
+            }
+        }
+
+        function renderClienti() {
+            const tbody = document.getElementById('tableBody');
+            
+            if (allClienti.length === 0) {
+                tbody.innerHTML = '<tr class="empty-state"><td colspan="6">Nessun cliente trovato</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = allClienti.map(cliente => `
+                <tr>
+                    <td data-label="Nome"><strong>${cliente.nome}</strong></td>
+                    <td data-label="Via">${cliente.via}</td>
+                    <td data-label="Città">${cliente.citta}</td>
+                    <td data-label="CAP">${cliente.cap}</td>
+                    <td data-label="Paese">${cliente.paese}</td>
+                    <td data-label="Azioni">
+                        <div class="action-buttons">
+                            <button class="btn-edit" onclick="editCliente(${cliente.id})">Modifica</button>
+                            <button class="btn-delete" onclick="deleteCliente(${cliente.id})">Elimina</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openCreateModal() {
+            currentClienteId = null;
+            document.getElementById('clienteForm').reset();
+            document.getElementById('paese').value = 'Italia';
+            document.getElementById('formErrorMessage').style.display = 'none';
+            document.getElementById('formSuccessMessage').style.display = 'none';
+            document.getElementById('addressPreview').textContent = '';
+            // Scroll to form
+            document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function editCliente(id) {
+            try {
+                const response = await fetch(`/api/clienti/${id}`);
+                if (!response.ok) throw new Error('Failed to load client');
+                
+                const cliente = await response.json();
+                currentClienteId = id;
+                
+                document.getElementById('nome').value = cliente.nome;
+                document.getElementById('via').value = cliente.via;
+                document.getElementById('citta').value = cliente.citta;
+                document.getElementById('cap').value = cliente.cap;
+                document.getElementById('paese').value = cliente.paese;
+                
+                document.getElementById('formErrorMessage').style.display = 'none';
+                document.getElementById('formSuccessMessage').style.display = 'none';
+                updateAddressPreview();
+                // Scroll to form
+                document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                showError('Errore nel caricamento del cliente');
+                console.error(error);
+            }
+        }
+
+        async function salvaCliente(event) {
+            event.preventDefault();
+            
+            const formError = document.getElementById('formErrorMessage');
+            const formSuccess = document.getElementById('formSuccessMessage');
+            formError.style.display = 'none';
+            formSuccess.style.display = 'none';
+
+            const data = {
+                nome: document.getElementById('nome').value.trim(),
+                via: document.getElementById('via').value.trim(),
+                citta: document.getElementById('citta').value.trim(),
+                cap: document.getElementById('cap').value.trim(),
+                paese: document.getElementById('paese').value.trim()
+            };
+
+            // Valida CAP
+            if (!/^\d{5}$/.test(data.cap)) {
+                showFormError('CAP deve essere 5 cifre');
+                return;
+            }
+
+            try {
+                const url = currentClienteId 
+                    ? `/api/clienti/${currentClienteId}` 
+                    : '/api/clienti';
+                
+                const method = currentClienteId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Errore nel salvataggio');
+                }
+
+                showFormSuccess(currentClienteId ? 'Cliente aggiornato' : 'Cliente creato');
+                setTimeout(() => {
+                    document.getElementById('clienteForm').reset();
+                    document.getElementById('paese').value = 'Italia';
+                    currentClienteId = null;
+                    loadClienti();
+                }, 1000);
+
+            } catch (error) {
+                showFormError(error.message);
+                console.error(error);
+            }
+        }
+
+        async function deleteCliente(id) {
+            if (!confirm('Sei sicuro di voler eliminare questo cliente?')) return;
+
+            try {
+                const response = await fetch(`/api/clienti/${id}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Failed to delete client');
+                
+                showSuccess('Cliente eliminato');
+                loadClienti();
+            } catch (error) {
+                showError('Errore nell\'eliminazione del cliente');
+                console.error(error);
+            }
+        }
+
+        function updateAddressPreview() {
+            const via = document.getElementById('via').value;
+            const citta = document.getElementById('citta').value;
+            const cap = document.getElementById('cap').value;
+            const paese = document.getElementById('paese').value;
+            
+            if (via && citta && cap && paese) {
+                document.getElementById('addressPreview').textContent = 
+                    `${via}, ${citta} (${cap}), ${paese}`;
+            }
+        }
+
+        function showFormError(msg) {
+            const el = document.getElementById('formErrorMessage');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        function showFormSuccess(msg) {
+            const el = document.getElementById('formSuccessMessage');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMessage');
+            el.textContent = msg;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        }
+
+        let autocompleteTimer;
+        
+        function autocompleteVia(event) {
+            const input = event.target;
+            const value = input.value.trim();
+            const list = document.getElementById('viaList');
+            
+            clearTimeout(autocompleteTimer);
+            
+            if (value.length < 2) {
+                list.classList.remove('active');
+                return;
+            }
+            
+            // Debounce OpenStreetMap API call
+            autocompleteTimer = setTimeout(() => {
+                fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(value)}&format=json&addressdetails=1&limit=5`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (!data || data.length === 0) {
+                            list.classList.remove('active');
+                            return;
+                        }
+                        
+                        list.innerHTML = data.map(item => {
+                            const address = item.address || {};
+                            const citta = address.city || address.town || address.village || 'N/A';
+                            const cap = address.postcode || '';
+                            const paese = address.country || '';
+                            // Estrae la via (street, road, path) e aggiunge il numero civico
+                            const street = address.road || address.street || address.path || '';
+                            const houseNumber = address.house_number || '';
+                            const via = houseNumber ? `${street} ${houseNumber}` : street;
+                            
+                            return `<div class="autocomplete-item" onclick="selectVia('${via.replace(/'/g, "\\'")}', '${citta.replace(/'/g, "\\'")}', '${cap}', '${paese.replace(/'/g, "\\'")}')">${via}<br><small>${citta} ${cap}</small></div>`;
+                        }).join('');
+                        list.classList.add('active');
+                    })
+                    .catch(e => {
+                        console.error('OpenStreetMap error:', e);
+                        list.classList.remove('active');
+                    });
+            }, 300);
+        }
+        
+        function selectVia(via, citta, cap, paese) {
+            document.getElementById('via').value = via;
+            document.getElementById('citta').value = citta;
+            document.getElementById('cap').value = cap;
+            document.getElementById('paese').value = paese;
+            document.getElementById('viaList').classList.remove('active');
+            updateAddressPreview();
+        }
+
+        function showSuccess(msg) {
+            const el = document.getElementById('successMessage');
+            el.textContent = msg;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        }
+
+        // Import/Export Functions
+        function downloadTemplateClienti() {
+            const link = document.createElement('a');
+            link.href = '/api/clienti/template';
+            link.download = 'Clienti_Template.xlsx';
+            link.click();
+        }
+
+        async function importClienti() {
+            const file = document.getElementById('importFileClienti').files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/clienti/import', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showSuccess(`Importati ${data.imported} clienti con successo`);
+                    loadClienti();
+                    document.getElementById('importFileClienti').value = '';
+                } else {
+                    showError(data.error || 'Errore nell\'importazione');
+                }
+            } catch (error) {
+                showError('Errore nell\'importazione: ' + error.message);
+            }
+        }
+
+        // Event listeners for live preview
+        document.addEventListener('DOMContentLoaded', () => {
+            const viaEl = document.getElementById('via');
+            const cittaEl = document.getElementById('citta');
+            const capEl = document.getElementById('cap');
+            const paeseEl = document.getElementById('paese');
+            
+            if (viaEl) viaEl.addEventListener('change', updateAddressPreview);
+            if (capEl) capEl.addEventListener('change', updateAddressPreview);
+            if (paeseEl) paeseEl.addEventListener('change', updateAddressPreview);
+            
+            loadClienti();
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('clienteModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Funzione logout globale
+        function logout() {
+            if (confirm('Sei sicuro di voler uscire?')) {
+                window.location.href = '/logout';
+            }
+        }
+
+        function toggleMobileMenu() {
+            const navMenu = document.getElementById('navMenu');
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            navMenu.classList.toggle('active');
+            hamburgerBtn.classList.toggle('active');
+        }
+
+        // Chiudi menu quando clicchi su un link
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('navMenu').classList.remove('active');
+                document.getElementById('hamburgerBtn').classList.remove('active');
+            });
+        });
+
+        // Chiudi menu quando ridimensioni la finestra
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                document.getElementById('navMenu').classList.remove('active');
+                document.getElementById('hamburgerBtn').classList.remove('active');
+            }
+        });
+
+        // Carica nome utente corrente
+        fetch('/api/auth/user', { credentials: 'same-origin' })
+            .then(response => response.json())
+            .then(user => {
+                const usernameEl = document.getElementById('currentUsername');
+                if (usernameEl && user) {
+                    if (user.nome_completo) {
+                        usernameEl.textContent = user.nome_completo;
+                    } else if (user.username) {
+                        usernameEl.textContent = user.username;
+                    }
+                }
+            })
+            .catch(error => console.error('Error loading user:', error));
+        
+        // Setup bottom menu visibility based on user role
+        setupMenuVisibility();
+    </script>
+</body>
+</html>

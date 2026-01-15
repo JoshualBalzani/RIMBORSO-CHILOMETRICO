@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifica 2FA - RIMBORSO KM</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Rimborso KM" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 26px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #718096;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .user-info {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            margin-bottom: 25px;
+            border-radius: 6px;
+        }
+
+        .user-info p {
+            color: #4a5568;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .user-info strong {
+            color: #2d3748;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 18px;
+            transition: border-color 0.3s;
+            text-align: center;
+            letter-spacing: 3px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .error {
+            color: #e53e3e;
+            font-size: 13px;
+            margin-top: 8px;
+            padding: 10px;
+            background: #fed7d7;
+            border-left: 3px solid #e53e3e;
+            border-radius: 4px;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .info-box {
+            background: #e0f2fe;
+            border-left: 4px solid #0284c7;
+            padding: 12px;
+            margin-top: 20px;
+            border-radius: 6px;
+        }
+
+        .info-box p {
+            color: #0c2d48;
+            font-size: 12px;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .footer-links {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .footer-links a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 12px;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .recovery-btn {
+            color: #c33;
+            background: white;
+            border: 1px solid #c33;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .recovery-btn:hover {
+            background: #fee;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            input[type="text"] {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🔐</div>
+        <h1>Verifica 2FA</h1>
+        <p class="subtitle">Inserisci il codice dall'app di autenticazione</p>
+
+        <div class="user-info">
+            <p>Account: <strong>{{ username }}</strong></p>
+        </div>
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="code">Codice di verifica</label>
+                <input type="text" 
+                       id="code" 
+                       name="code" 
+                       maxlength="6" 
+                       placeholder="000000" 
+                       required 
+                       pattern="[0-9]{6}"
+                       inputmode="numeric"
+                       autocomplete="off"
+                       autofocus>
+                
+                {% if error %}
+                <div class="error">{{ error }}</div>
+                {% endif %}
+                
+                <p class="help-text">Inserisci il codice a 6 cifre mostrato nell'app di autenticazione (Google Authenticator, Authy, ecc.)</p>
+            </div>
+
+            <button type="submit">Verifica e Accedi</button>
+        </form>
+
+        <div class="info-box">
+            <p><strong>💡 Hai un codice di backup?</strong> Puoi usarlo se non hai accesso all'app di autenticazione. Inseriscilo come il codice TOTP.</p>
+        </div>
+
+        <div class="footer-links">
+            <p style="margin: 0 0 8px 0; font-size: 12px; color: #666;">
+                <a href="{{ url_for('logout') }}">Non sei tu? Accedi con un altro account</a>
+            </p>
+            <p style="margin: 0; font-size: 11px; color: #999;">
+                <button type="button" onclick="richiestaRecovery()" class="recovery-btn">⚠️ Ho perso 2FA e codici di backup</button>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Formatta automaticamente il codice mentre lo digiti
+        document.getElementById('code').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+        });
+
+        function richiestaRecovery() {
+            alert(
+                '⚠️ RICHIESTA DI RECOVERY 2FA\n\n' +
+                'Contatta l\'amministratore del sistema per resettare la tua autenticazione a 2 fattori.\n\n' +
+                'Dovrai fornire:\n' +
+                '- Il tuo username (' + document.querySelector('.user-info strong').textContent + ')\n' +
+                '- Una verifica di identità\n\n' +
+                'L\'admin ressetterà 2FA e dovrai riconfigurarlo al prossimo accesso.'
+            );
+        }
+
+        // Focus sul primo campo
+        document.getElementById('code').focus();
+    </script>
+</body>
+</html>

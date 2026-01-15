@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Utenti - Rimborso KM</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Rimborso KM" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        main.container {
+            max-width: 1200px !important;
+            margin: 0 auto !important;
+            padding: 20px !important;
+            width: auto !important;
+        }
+
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #333;
+            border-bottom: 2px solid #0071e3;
+            padding-bottom: 12px;
+        }
+            padding: 20px;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            margin: 0 0 8px 0;
+            font-size: 28px;
+            color: #333;
+        }
+
+        .page-header .subtitle {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #0071e3;
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+            background: white;
+            color: #333;
+        }
+
+        .btn:hover {
+            background: #f9f9f9;
+            border-color: #999;
+        }
+
+        .btn.primary {
+            background: #0071e3;
+            color: white;
+            border-color: #0071e3;
+        }
+
+        .btn.primary:hover {
+            background: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .btn.danger {
+            color: #ff3b30;
+            border-color: #ff3b30;
+        }
+
+        .btn.danger:hover {
+            background: #fff0f0;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .message.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .users-table thead {
+            background: #f5f5f5;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .users-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .users-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+
+        .users-table tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.admin {
+            background: #e3f2fd;
+            color: #0071e3;
+        }
+
+        .status-badge.user {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-small:hover {
+            border-color: #0071e3;
+            color: #0071e3;
+        }
+
+        .btn-small.delete:hover {
+            border-color: #ff3b30;
+            color: #ff3b30;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .action-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .action-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            min-width: 180px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            margin-top: 4px;
+        }
+
+        .action-dropdown.hidden {
+            display: none;
+        }
+
+        .action-item {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 10px 14px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 13px;
+            color: #333;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+
+        .action-item:hover {
+            background: #f5f5f5;
+            color: #0071e3;
+        }
+
+        .action-item.danger:hover {
+            background: #fff0f0;
+            color: #ff3b30;
+        }
+
+        .action-trigger {
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+
+        .action-trigger:hover {
+            background: #f0f0f0;
+            border-color: #999;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            main.container {
+                padding: 12px;
+            }
+
+            .section {
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            .page-header h1 {
+                font-size: 24px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Tabella responsiva per mobile */
+            .users-table {
+                width: 100%;
+                border: none;
+                border-collapse: collapse;
+            }
+
+            .users-table thead {
+                display: none;
+            }
+
+            .users-table tbody {
+                display: block;
+            }
+
+            .users-table tr {
+                display: block;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                margin-bottom: 12px;
+                padding: 12px;
+                background: white;
+            }
+
+            .users-table td {
+                display: block;
+                padding: 8px 0;
+                border: none;
+                border-bottom: 1px solid #f0f0f0;
+                text-align: left;
+            }
+
+            .users-table td:before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #0071e3;
+                display: inline-block;
+                width: 90px;
+                margin-right: 12px;
+            }
+
+            .users-table td:last-child {
+                border-bottom: none;
+            }
+
+            .users-table tbody tr:hover {
+                background: white;
+            }
+
+            .actions {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .btn-small {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="skip-to-content">Salta al contenuto principale</a>
+
+    <!-- Navigation - Top Bar (Desktop Only) -->
+    <nav class="navbar" role="navigation" aria-label="Navigazione principale">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <img src="/web-app-manifest-512x512.png" alt="Rimborso KM" class="logo-icon" />
+                <span class="logo-text">Rimborso KM</span>
+            </div>
+            <div class="navbar-user">
+                <div class="navbar-avatar" id="navbar-avatar" onclick="toggleUserMenu(event)">JB</div>
+                <span class="navbar-username" id="navbar-username" onclick="toggleUserMenu(event)">Utente</span>
+                <div class="user-dropdown-menu" id="user-dropdown-menu">
+                    <div class="user-dropdown-header">
+                        <div class="user-dropdown-avatar" id="dropdown-avatar">JB</div>
+                        <div>
+                            <div class="user-dropdown-name" id="dropdown-name">Utente</div>
+                            <div class="user-dropdown-role" id="dropdown-role">User</div>
+                        </div>
+                    </div>
+                    <div class="user-dropdown-divider"></div>
+                    <div class="user-dropdown-mobile-items">
+                        <a href="/veicoli" class="user-dropdown-item">🚙 Veicoli</a>
+                        <a href="/clienti" class="user-dropdown-item">👔 Clienti</a>
+                        <a href="/indirizzi-aziendali" class="user-dropdown-item">📍 Indirizzi</a>
+                    </div>
+                    <div class="user-dropdown-divider"></div>
+                    <a href="/impostazioni" class="user-dropdown-item">⚙️ Impostazioni</a>
+                    <a href="#" onclick="logout(); return false;" class="user-dropdown-item">🚪 Esci</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Bottom Navigation Bar - Mobile & Tablet -->
+    <nav class="bottom-nav" role="navigation" aria-label="Navigazione">
+        <ul>
+            <li><a href="/" class="nav-link" data-page="dashboard" title="Dashboard"><span class="icon">📊</span><span>Dashboard</span></a></li>
+            <li id="menu-trasferte" style="display: none;"><a href="/trasferte" class="nav-link" data-page="trasferte" title="Trasferte"><span class="icon">🚗</span><span>Trasferte</span></a></li>
+            <li id="menu-archivio" style="display: none;"><a href="/archivio" class="nav-link" data-page="archivio" title="Archivio"><span class="icon">📁</span><span>Archivio</span></a></li>
+            <li id="menu-veicoli" style="display: none;"><a href="/veicoli" class="nav-link" data-page="veicoli" title="Veicoli"><span class="icon">🚙</span><span>Veicoli</span></a></li>
+            <li id="menu-clienti" style="display: none;"><a href="/clienti" class="nav-link" data-page="clienti" title="Clienti"><span class="icon">👔</span><span>Clienti</span></a></li>
+            <li id="menu-indirizzi" style="display: none;"><a href="/indirizzi-aziendali" class="nav-link" data-page="indirizzi" title="Indirizzi"><span class="icon">📍</span><span>Indirizzi</span></a></li>
+            <li id="admin-menu-item" style="display: none;"><a href="/impostazioni-utenti" class="nav-link" data-page="utenti" title="Utenti" onclick="window.location.href='/impostazioni-utenti'; return false;"><span class="icon">👥</span><span>Utenti</span></a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container" id="main-content">
+        <header class="page-header">
+            <h1>Gestione Utenti</h1>
+            <p class="subtitle">Crea, modifica e elimina gli account utente</p>
+        </header>
+
+        <!-- Messaggio di feedback -->
+        <div id="message" class="message"></div>
+
+        <!-- SEZIONE: CREA NUOVO UTENTE -->
+        <section class="section">
+            <h2>➕ Crea Nuovo Utente</h2>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nuovo-username">Username</label>
+                    <input type="text" id="nuovo-username" placeholder="es. mario.rossi" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="nuovo-email">Email</label>
+                    <input type="email" id="nuovo-email" placeholder="es. mario@azienda.it" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="nuovo-nome">Nome Completo</label>
+                    <input type="text" id="nuovo-nome" placeholder="Mario Rossi" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="nuovo-ruolo">Ruolo</label>
+                    <select id="nuovo-ruolo">
+                        <option value="user">Utente Normale</option>
+                        <option value="admin">Amministratore</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="nuovo-password">Password Temporanea</label>
+                    <input type="password" id="nuovo-password" placeholder="Password (minimo 8 caratteri)" required>
+                </div>
+            </div>
+
+            <button class="btn primary" onclick="creaUtente()">✅ Crea Utente</button>
+        </section>
+
+        <!-- SEZIONE: LISTA UTENTI -->
+        <section class="section">
+            <h2>👥 Elenco Utenti</h2>
+            
+            <div id="loading" class="loading" style="display: none;">Caricamento utenti...</div>
+            <div id="empty-state" class="empty-state" style="display: none;">
+                <div class="empty-state-icon">👥</div>
+                <p>Nessun utente trovato</p>
+            </div>
+
+            <table class="users-table" id="users-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Nome</th>
+                        <th>Ruolo</th>
+                        <th>Creato</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody id="users-tbody">
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Modal Modifica Utente -->
+        <div id="modificaModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+            <div style="background: white; padding: 30px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                <h2 style="margin-top: 0; margin-bottom: 20px;">Modifica Utente</h2>
+                
+                <form id="modificaForm" onsubmit="salvaModificaUtente(event)">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">Username:</label>
+                        <input type="text" id="editUsername" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;" readonly disabled>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">Email:</label>
+                        <input type="email" id="editEmail" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;" required>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">Nome Completo:</label>
+                        <input type="text" id="editNomeCompleto" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;" required>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #333;">Ruolo:</label>
+                        <select id="editRuolo" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;" required>
+                            <option value="user">Utente</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button type="button" onclick="chiudiModificaModal()" style="padding: 8px 16px; background: #f0f0f0; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">Annulla</button>
+                        <button type="submit" style="padding: 8px 16px; background: #0071e3; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">Salva</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script>
+        // Verifica autenticazione all'avvio
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const authCheck = await fetchApi('/api/auth/user');
+                if (!authCheck || !authCheck.username || authCheck.ruolo !== 'admin') {
+                    window.location.href = '/login';
+                    return;
+                }
+                const usernameEl = document.getElementById('currentUsername');
+                if (usernameEl) {
+                    usernameEl.textContent = authCheck.nome_completo || authCheck.username;
+                }
+            } catch (error) {
+                window.location.href = '/login';
+                return;
+            }
+
+            // Carica elenco utenti
+            await caricaUtenti();
+        });
+
+        // Carica elenco di tutti gli utenti
+        async function caricaUtenti() {
+            const loadingDiv = document.getElementById('loading');
+            const emptyDiv = document.getElementById('empty-state');
+            const tableDiv = document.getElementById('users-table');
+            const tbody = document.getElementById('users-tbody');
+
+            loadingDiv.style.display = 'block';
+            emptyDiv.style.display = 'none';
+            tableDiv.style.display = 'none';
+            tbody.innerHTML = '';
+
+            try {
+                console.log('[LOAD] Caricamento utenti...');
+                
+                const response = await fetch('/api/utenti/list', {
+                    method: 'GET',
+                    credentials: 'same-origin'
+                });
+
+                console.log('[LOAD] Response status:', response.status);
+
+                if (!response.ok) {
+                    console.error('[LOAD] Errore risposta:', response.statusText);
+                    loadingDiv.style.display = 'none';
+                    mostraMessaggio('Errore nel caricamento degli utenti: ' + response.statusText, 'error');
+                    return;
+                }
+
+                const data = await response.json();
+                console.log('[LOAD] Data ricevuti:', data);
+                
+                if (!data.users || data.users.length === 0) {
+                    console.log('[LOAD] Nessun utente trovato');
+                    loadingDiv.style.display = 'none';
+                    emptyDiv.style.display = 'block';
+                    return;
+                }
+
+                console.log('[LOAD] Utenti trovati:', data.users.length);
+
+                data.users.forEach(user => {
+                    const row = document.createElement('tr');
+                    const dataCreato = new Date(user.data_creazione).toLocaleDateString('it-IT');
+                    
+                    row.innerHTML = `
+                        <td data-label="Username"><strong>${user.username}</strong></td>
+                        <td data-label="Email">${user.email}</td>
+                        <td data-label="Nome">${user.nome_completo || '-'}</td>
+                        <td data-label="Ruolo">
+                            <span class="status-badge ${user.ruolo}">
+                                ${user.ruolo === 'admin' ? '👑 Admin' : '👤 Utente'}
+                            </span>
+                        </td>
+                        <td data-label="Creato">${dataCreato}</td>
+                        <td data-label="Azioni">
+                            <div class="action-menu">
+                                <button class="action-trigger" onclick="toggleActionMenu(event, '${user.id}')">
+                                    ⋮ Azioni
+                                </button>
+                                <div class="action-dropdown hidden" id="menu-${user.id}">
+                                    <button class="action-item" onclick="window.location.href='/admin/utenti/${user.id}'; closeActionMenu('${user.id}')">
+                                        👁️ Visualizza Profilo
+                                    </button>
+                                    <button class="action-item" onclick="modificaUtente('${user.id}', '${user.username}', '${user.email}', '${user.nome_completo}', '${user.ruolo}'); closeActionMenu('${user.id}')">
+                                        ✏️ Modifica
+                                    </button>
+                                    ${user.username !== 'admin' ? `<button class="action-item danger" onclick="resetPasswordUtente('${user.id}', '${user.nome_completo}'); closeActionMenu('${user.id}')">🔐 Resetta Password</button>` : ''}
+                                    ${user.username !== 'admin' ? `<button class="action-item danger" onclick="eliminaUtenteFromList('${user.id}', '${user.nome_completo}'); closeActionMenu('${user.id}')">🗑️ Elimina</button>` : ''}
+                                </div>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                loadingDiv.style.display = 'none';
+                tableDiv.style.display = 'table';
+                console.log('[LOAD] Utenti caricati con successo');
+            } catch (error) {
+                console.error('[LOAD] Errore caricamento utenti:', error);
+                loadingDiv.style.display = 'none';
+                mostraMessaggio('Errore nel caricamento degli utenti', 'error');
+            }
+        }
+
+        // Crea nuovo utente
+        async function creaUtente() {
+            const username = document.getElementById('nuovo-username').value.trim();
+            const email = document.getElementById('nuovo-email').value.trim();
+            const nome = document.getElementById('nuovo-nome').value.trim();
+            const ruolo = document.getElementById('nuovo-ruolo').value;
+            const password = document.getElementById('nuovo-password').value;
+
+            // Validazione
+            if (!username || !email || !nome || !password) {
+                mostraMessaggio('Compila tutti i campi', 'error');
+                return;
+            }
+
+            if (password.length < 8) {
+                mostraMessaggio('La password deve essere almeno 8 caratteri', 'error');
+                return;
+            }
+
+            if (!email.includes('@')) {
+                mostraMessaggio('Email non valida', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetchApi('/api/utenti/crea', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        username: username,
+                        email: email,
+                        nome_completo: nome,
+                        password: password,
+                        ruolo: ruolo
+                    })
+                });
+
+                if (response.success || response.id) {
+                    mostraMessaggio(`✅ Utente ${username} creato con successo!`, 'success');
+                    
+                    // Pulisci campi
+                    document.getElementById('nuovo-username').value = '';
+                    document.getElementById('nuovo-email').value = '';
+                    document.getElementById('nuovo-nome').value = '';
+                    document.getElementById('nuovo-password').value = '';
+                    document.getElementById('nuovo-ruolo').value = 'user';
+                    
+                    // Ricarica lista
+                    setTimeout(() => caricaUtenti(), 1000);
+                } else {
+                    mostraMessaggio(`❌ Errore: ${response.error || 'Impossibile creare utente'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Errore creazione utente:', error);
+                mostraMessaggio('Errore nella creazione dell\'utente', 'error');
+            }
+        }
+
+        // Modifica utente
+        async function modificaUtente(userId, username, email, nome, ruolo) {
+            // Popola il modal con i dati attuali
+            document.getElementById('editUsername').value = username;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editNomeCompleto').value = nome;
+            document.getElementById('editRuolo').value = ruolo;
+            
+            // Salva l'userId nello stato del modal
+            document.getElementById('modificaForm').dataset.userId = userId;
+            
+            // Mostra il modal
+            document.getElementById('modificaModal').style.display = 'flex';
+        }
+
+        function chiudiModificaModal() {
+            document.getElementById('modificaModal').style.display = 'none';
+        }
+
+        async function salvaModificaUtente(event) {
+            event.preventDefault();
+            
+            const userId = document.getElementById('modificaForm').dataset.userId;
+            const email = document.getElementById('editEmail').value;
+            const nomeCompleto = document.getElementById('editNomeCompleto').value;
+            const ruolo = document.getElementById('editRuolo').value;
+
+            try {
+                const response = await fetch(`/api/utenti/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        nome_completo: nomeCompleto,
+                        ruolo: ruolo
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    mostraMessaggio('Utente modificato con successo!', 'success');
+                    chiudiModificaModal();
+                    setTimeout(() => caricaUtenti(), 1000);
+                } else {
+                    const data = await response.json();
+                    mostraMessaggio(`Errore: ${data.error || 'Errore sconosciuto'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Errore modifica utente:', error);
+                mostraMessaggio('Errore nella modifica dell\'utente', 'error');
+            }
+        }
+
+        // Elimina utente dalla lista
+        async function eliminaUtenteFromList(userId, nomeCompleto) {
+            if (!confirm(`Sei sicuro di voler eliminare ${nomeCompleto}? Questa azione non può essere annullata.`)) {
+                return;
+            }
+            
+            const secondConfirm = prompt(`Digita il nome completo dell'utente (${nomeCompleto}) per confermare l'eliminazione:`);
+            if (secondConfirm !== nomeCompleto) {
+                mostraMessaggio('Nome non corrispondente. Eliminazione annullata.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/utenti/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok || response.status === 204) {
+                    mostraMessaggio(`Utente ${nomeCompleto} eliminato con successo!`, 'success');
+                    setTimeout(() => caricaUtenti(), 1000);
+                } else {
+                    const data = await response.json();
+                    mostraMessaggio(`Errore: ${data.error || 'Errore sconosciuto'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Errore eliminazione utente:', error);
+                mostraMessaggio('Errore nell\'eliminazione dell\'utente', 'error');
+            }
+        }
+
+        // Resetta password per utente dalla lista
+        async function resetPasswordUtente(userId, nomeUtente) {
+            const nuovaPassword = prompt(`Inserisci la nuova password per ${nomeUtente}:\n(minimo 8 caratteri)`);
+            if (!nuovaPassword) return;
+            
+            if (nuovaPassword.length < 8) {
+                mostraMessaggio('La password deve avere almeno 8 caratteri', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/utenti/${userId}/reset-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password: nuovaPassword })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    mostraMessaggio(`Password di ${nomeUtente} resettata con successo!`, 'success');
+                } else {
+                    const data = await response.json();
+                    mostraMessaggio(`Errore: ${data.error || 'Errore sconosciuto'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Errore reset password:', error);
+                mostraMessaggio('Errore nel reset della password', 'error');
+            }
+        }
+
+        // Elimina utente (OLD - mantenuto per compatibilità)
+        async function eliminaUtente(userId, username) {
+            eliminaUtenteFromList(userId, username);
+        }
+
+        // Mostra messaggio
+        function mostraMessaggio(messaggio, tipo) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.textContent = messaggio;
+            msgDiv.className = `message ${tipo}`;
+            msgDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                msgDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Sei sicuro di voler uscire?')) {
+                window.location.href = '/logout';
+            }
+        }
+
+        function toggleMobileMenu() {
+            const navMenu = document.getElementById('navMenu');
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            navMenu.classList.toggle('active');
+            hamburgerBtn.classList.toggle('active');
+        }
+
+        // Chiudi menu quando clicchi su un link
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('navMenu').classList.remove('active');
+                document.getElementById('hamburgerBtn').classList.remove('active');
+            });
+        });
+
+        // Chiudi menu quando ridimensioni la finestra
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                document.getElementById('navMenu').classList.remove('active');
+                document.getElementById('hamburgerBtn').classList.remove('active');
+            }
+        });
+    </script>
+
+    <!-- Funzioni per il menu dropdown (Global Scope) -->
+    <script>
+        function toggleActionMenu(event, userId) {
+            event.stopPropagation();
+            const menu = document.getElementById('menu-' + userId);
+            
+            // Chiudi tutti gli altri menu
+            document.querySelectorAll('.action-dropdown').forEach(m => {
+                if (m.id !== 'menu-' + userId) {
+                    m.classList.add('hidden');
+                }
+            });
+            
+            // Toggle il menu corrente
+            menu.classList.toggle('hidden');
+        }
+
+        function closeActionMenu(userId) {
+            const menu = document.getElementById('menu-' + userId);
+            menu.classList.add('hidden');
+        }
+
+        // Chiudi il menu quando clicchi fuori
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.action-dropdown').forEach(m => {
+                m.classList.add('hidden');
+            });
+        });
+
+        // Setup menu visibility based on user role
+        // Nota: setupMenuVisibility è definita in app.js
+        // Chiama setupMenuVisibility al caricamento
+        document.addEventListener('DOMContentLoaded', setupMenuVisibility);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dettagli Utente - Admin</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Rimborso KM" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            color: var(--color-primary);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--spacing-xl);
+            transition: opacity var(--transition-fast);
+        }
+
+        .back-link:hover {
+            opacity: 0.7;
+        }
+
+        .user-header {
+            background: var(--color-white);
+            border: 1px solid var(--color-gray-200);
+            padding: var(--spacing-xl);
+            border-radius: var(--border-radius-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .user-header-content {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--spacing-xl);
+        }
+
+        .user-header-info {
+            flex: 1;
+        }
+
+        .user-header h1 {
+            margin: 0;
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-gray-900);
+        }
+
+        .user-header-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+        }
+
+        .detail-item {
+            padding: var(--spacing-md);
+            background: var(--color-gray-50);
+            border-radius: var(--border-radius-md);
+        }
+
+        .detail-label {
+            font-size: var(--font-size-xs);
+            color: var(--color-gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .detail-value {
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-gray-900);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .stat-card {
+            background: var(--color-white);
+            border: 1px solid var(--color-gray-200);
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius-lg);
+            text-align: center;
+            transition: all var(--transition-base);
+        }
+
+        .stat-card:hover {
+            border-color: var(--color-primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-number {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+            margin: var(--spacing-md) 0;
+        }
+
+        .stat-label {
+            color: var(--color-gray-600);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 0;
+            margin-bottom: var(--spacing-xl);
+            border-bottom: 1px solid var(--color-gray-200);
+            overflow-x: auto;
+        }
+
+        .tab-button {
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-600);
+            border-bottom: 2px solid transparent;
+            transition: all var(--transition-base);
+            font-weight: var(--font-weight-medium);
+            white-space: nowrap;
+        }
+
+        .tab-button:hover {
+            color: var(--color-primary);
+        }
+
+        .tab-button.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn var(--transition-base);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--color-white);
+            border: 1px solid var(--color-gray-200);
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+        }
+
+        .data-table thead {
+            background: var(--color-gray-50);
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+
+        .data-table th {
+            padding: var(--spacing-md);
+            text-align: left;
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-gray-700);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-table td {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--color-gray-100);
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-700);
+            vertical-align: middle;
+        }
+
+        .data-table td strong {
+            display: block;
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-gray-900);
+            margin-bottom: 4px;
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--color-gray-50);
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .empty-state {
+            padding: var(--spacing-2xl);
+            text-align: center;
+            color: var(--color-gray-500);
+        }
+
+        .loading {
+            padding: var(--spacing-2xl);
+            text-align: center;
+            color: var(--color-gray-400);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-lg);
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 1px solid var(--color-gray-300);
+            background: var(--color-white);
+            color: var(--color-gray-700);
+            cursor: pointer;
+            border-radius: var(--border-radius-md);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            transition: all var(--transition-fast);
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--color-primary);
+            color: var(--color-white);
+            border-color: var(--color-primary);
+        }
+
+        .pagination button.active {
+            background: var(--color-primary);
+            color: var(--color-white);
+            border-color: var(--color-primary);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            padding: var(--spacing-md);
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--color-danger);
+            border-radius: var(--border-radius-md);
+            margin-bottom: var(--spacing-lg);
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: var(--spacing-md);
+            }
+
+            .user-header-content {
+                flex-direction: column;
+            }
+
+            .user-header-details {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tabs-container {
+                margin-bottom: var(--spacing-md);
+            }
+
+            .tab-button {
+                padding: var(--spacing-md);
+                font-size: var(--font-size-xs);
+            }
+
+            .data-table {
+                font-size: var(--font-size-xs);
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: var(--spacing-sm);
+            }
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .data-table thead {
+            background: #f5f5f5;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .data-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table tbody tr:hover {
+            background: #fafafa;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c33;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3c3;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .pagination button:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .pagination button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* Custom styles per reset password */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .password-strength {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .strength-bar {
+            height: 4px;
+            background: #ddd;
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 2px;
+            transition: width 0.3s, background-color 0.3s;
+        }
+
+        .strength-fill.weak {
+            width: 33%;
+            background-color: #ff6b6b;
+        }
+
+        .strength-fill.medium {
+            width: 66%;
+            background-color: #ffd93d;
+        }
+
+        .strength-fill.strong {
+            width: 100%;
+            background-color: #51cf66;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-reset {
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-reset:hover {
+            background: #5568d3;
+        }
+
+        .alert-info {
+            background: #d6ebf5;
+            color: #0c5460;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            border-left: 4px solid #0c5460;
+            font-size: 13px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .account-management {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #0071e3;
+        }
+
+        .account-management h3 {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            background: white;
+            color: #333;
+        }
+
+        .btn-action:hover {
+            background: #f0f0f0;
+            border-color: #999;
+        }
+
+        .btn-action.danger {
+            background: #ff3b30;
+            color: white;
+            border-color: #ff3b30;
+        }
+
+        .btn-action.danger:hover {
+            background: #e63329;
+            border-color: #e63329;
+        }
+
+        @media (max-width: 768px) {
+            .user-header {
+                padding: 20px;
+            }
+
+            .user-header h1 {
+                font-size: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .data-table {
+                font-size: 13px;
+            }
+
+            .data-table th, .data-table td {
+                padding: 8px;
+            }
+
+            .tabs {
+                overflow-x: auto;
+            }
+
+            .tab-button {
+                padding: 10px 15px;
+                font-size: 14px;
+                white-space: nowrap;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-buttons button {
+                width: 100%;
+            }
+
+            .account-management {
+                padding: 16px;
+            }
+
+            .account-management h3 {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body class="has-bottom-nav">
+    <!-- Navigation - Top Bar (Desktop Only) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <img src="/web-app-manifest-512x512.png" alt="Rimborso KM" class="logo-icon" />
+                <span class="logo-text">Rimborso KM</span>
+            </div>
+            <div class="navbar-user">
+                <div class="navbar-avatar" id="navbar-avatar" onclick="toggleUserMenu(event)">JB</div>
+                <span class="navbar-username" id="navbar-username" onclick="toggleUserMenu(event)">Utente</span>
+                
+                <div class="user-dropdown-menu" id="user-dropdown-menu">
+                    <div class="user-dropdown-header">
+                        <div class="user-dropdown-avatar" id="dropdown-avatar">JB</div>
+                        <div>
+                            <div class="user-dropdown-name" id="dropdown-name">Utente</div>
+                            <div class="user-dropdown-role" id="dropdown-role">User</div>
+                        </div>
+                    </div>
+                    <div class="user-dropdown-divider"></div>
+                    <div class="user-dropdown-mobile-items">
+                        <a href="/veicoli" class="user-dropdown-item">🚙 Veicoli</a>
+                        <a href="/clienti" class="user-dropdown-item">👔 Clienti</a>
+                        <a href="/indirizzi-aziendali" class="user-dropdown-item">📍 Indirizzi</a>
+                    </div>
+                    <div class="user-dropdown-divider"></div>
+                    <a href="/impostazioni" class="user-dropdown-item">⚙️ Impostazioni</a>
+                    <a href="#" onclick="logout(); return false;" class="user-dropdown-item">🚪 Esci</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Bottom Navigation Bar - Mobile & Tablet -->
+    <nav class="bottom-nav" role="navigation" aria-label="Navigazione">
+        <ul>
+            <li><a href="/" class="nav-link" data-page="dashboard" title="Dashboard"><span class="icon">📊</span><span>Dashboard</span></a></li>
+            <li><a href="/impostazioni-utenti" class="nav-link" data-page="utenti" title="Utenti"><span class="icon">👥</span><span>Utenti</span></a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <div class="admin-container">
+            <!-- Back Link -->
+            <a href="{{ url_for('impostazioni_utenti') }}" class="back-link">← Torna a Gestione Utenti</a>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="error-message"></div>
+
+            <!-- User Header -->
+            <div class="user-header" id="userHeader" style="display:none;">
+                <div class="user-header-content">
+                    <div class="user-header-info">
+                        <h1 id="userName">-</h1>
+                        <div class="user-header-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Email</div>
+                                <div class="detail-value" id="userEmail">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Ruolo</div>
+                                <div class="detail-value" id="userRole">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Registrato il</div>
+                                <div class="detail-value" id="userCreated">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Ultimo Accesso</div>
+                                <div class="detail-value" id="userLastAccess">Mai</div>
+                            </div>
+                        </div>
+                        <div class="account-management">
+                            <h3>🔑 Gestione Account</h3>
+                            <div class="action-buttons">
+                                <button class="btn-reset btn-action" onclick="openResetPasswordModal()">
+                                    🔐 Resetta Password
+                                </button>
+                                <button class="btn-reset btn-action danger" onclick="deleteUser()" title="Elimina questo utente dal sistema">
+                                    🗑️ Elimina Utente
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Grid -->
+            <div class="stats-grid" id="statsSection" style="display:none;">
+                <div class="stat-card">
+                    <div class="stat-label">📊 Trasferte</div>
+                    <div class="stat-number" id="statTrasferte">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">📏 KM Totali</div>
+                    <div class="stat-number" id="statKm">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">💰 Rimborsi</div>
+                    <div class="stat-number" id="statRimborsi">€0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">🚗 Veicoli</div>
+                    <div class="stat-number" id="statVeicoli">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">📍 Indirizzi</div>
+                    <div class="stat-number" id="statIndirizzi">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">🏢 Clienti</div>
+                    <div class="stat-number" id="statClienti">0</div>
+                </div>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="tabs-container">
+                <button class="tab-button active" data-tab="dashboard">Dashboard</button>
+                <button class="tab-button" data-tab="trasferte">Trasferte</button>
+                <button class="tab-button" data-tab="veicoli">Veicoli</button>
+                <button class="tab-button" data-tab="indirizzi">Indirizzi</button>
+                <button class="tab-button" data-tab="clienti">Clienti</button>
+            </div>
+
+            <!-- TAB: Dashboard -->
+            <div id="dashboard" class="tab-content active">
+                <div class="loading">Caricamento dashboard...</div>
+            </div>
+
+            <!-- TAB: Trasferte -->
+            <div id="trasferte" class="tab-content">
+                <div class="loading">Caricamento trasferte...</div>
+            </div>
+
+            <!-- TAB: Veicoli -->
+            <div id="veicoli" class="tab-content">
+                <div class="loading">Caricamento veicoli...</div>
+            </div>
+
+            <!-- TAB: Indirizzi -->
+            <div id="indirizzi" class="tab-content">
+                <div class="loading">Caricamento indirizzi...</div>
+            </div>
+
+            <!-- TAB: Clienti -->
+            <div id="clienti" class="tab-content">
+                <div class="loading">Caricamento clienti...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Reset Password Modal -->
+    <div id="resetPasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Resetta Password Utente</h2>
+                <button class="modal-close" onclick="closeResetPasswordModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-info">
+                    ℹ️ Inserisci una nuova password per l'utente. La password deve contenere almeno 8 caratteri, inclusi lettere maiuscole, minuscole, numeri e simboli.
+                </div>
+                <form id="resetPasswordForm" onsubmit="submitResetPassword(event)">
+                    <div class="form-group">
+                        <label for="newPassword">Nuova Password *</label>
+                        <input 
+                            type="password" 
+                            id="newPassword" 
+                            placeholder="Inserisci la nuova password"
+                            oninput="checkPasswordStrength()"
+                            required
+                        >
+                        <div class="password-strength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strengthFill"></div>
+                            </div>
+                            <div id="strengthText" style="margin-top: 5px; font-size: 12px; color: #666;"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Conferma Password *</label>
+                        <input 
+                            type="password" 
+                            id="confirmPassword" 
+                            placeholder="Ripeti la password"
+                            required
+                        >
+                    </div>
+                    <div id="resetPasswordError" style="color: #c33; font-size: 13px; margin-bottom: 15px; display: none;"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeResetPasswordModal()">Annulla</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">Resetta Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Funzioni per il reset password
+        function openResetPasswordModal() {
+            document.getElementById('resetPasswordModal').classList.add('active');
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            document.getElementById('resetPasswordError').style.display = 'none';
+            document.getElementById('strengthFill').className = 'strength-fill';
+            document.getElementById('strengthText').textContent = '';
+        }
+
+        function closeResetPasswordModal() {
+            document.getElementById('resetPasswordModal').classList.remove('active');
+        }
+
+        function checkPasswordStrength() {
+            const password = document.getElementById('newPassword').value;
+            const fill = document.getElementById('strengthFill');
+            const text = document.getElementById('strengthText');
+            
+            // Valutazione della forza della password
+            let strength = 0;
+            let requirements = [];
+            
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) strength++;
+            
+            // Aggiorna la barra di forza
+            fill.className = 'strength-fill';
+            if (strength <= 2) {
+                fill.classList.add('weak');
+                text.textContent = '❌ Password debole';
+            } else if (strength <= 3) {
+                fill.classList.add('medium');
+                text.textContent = '⚠️ Password media';
+            } else {
+                fill.classList.add('strong');
+                text.textContent = '✅ Password forte';
+            }
+        }
+
+        async function submitResetPassword(event) {
+            event.preventDefault();
+            
+            const password = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorDiv = document.getElementById('resetPasswordError');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Validazioni lato client
+            if (password !== confirmPassword) {
+                errorDiv.textContent = 'Le password non coincidono';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            if (password.length < 8) {
+                errorDiv.textContent = 'La password deve avere almeno 8 caratteri';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Disabilita il pulsante durante l'invio
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Invio in corso...';
+            
+            try {
+                const response = await fetch(`/api/utenti/${utenteId}/reset-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password: password })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    // Gestisci i diversi tipi di errore
+                    let errorMessage = 'Errore nel reset della password';
+                    
+                    if (data.error) {
+                        errorMessage = data.error;
+                    }
+                    
+                    if (data.requirements && Array.isArray(data.requirements)) {
+                        errorMessage = data.error || 'La password non è sufficientemente forte:';
+                        errorMessage += '\n' + data.requirements.map(r => '• ' + r).join('\n');
+                    }
+                    
+                    errorDiv.innerHTML = '<strong>Errore:</strong><br>' + errorMessage.replace(/\n/g, '<br>');
+                    errorDiv.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Resetta Password';
+                    return;
+                }
+                
+                // Successo
+                alert('✅ Password resettata con successo per ' + document.getElementById('userName').textContent);
+                closeResetPasswordModal();
+                
+            } catch (error) {
+                console.error('Errore:', error);
+                errorDiv.textContent = 'Errore nella comunicazione con il server: ' + error.message;
+                errorDiv.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Resetta Password';
+            }
+        }
+
+        // Chiudi modal quando clicchi fuori
+        window.addEventListener('click', (event) => {
+            const modal = document.getElementById('resetPasswordModal');
+            if (event.target === modal) {
+                closeResetPasswordModal();
+            }
+        });
+    </script>
+
+    <script>
+        // Estrai utente_id dalla URL
+        const pathParts = window.location.pathname.split('/');
+        const utenteId = pathParts[pathParts.length - 1];
+        console.log('🔍 DEBUG: pathname =', window.location.pathname);
+        console.log('🔍 DEBUG: pathParts =', pathParts);
+        console.log('🔍 DEBUG: utenteId =', utenteId);
+
+        // Carica informazioni utente loggato
+        function loadCurrentUser() {
+            fetch('/api/auth/user', { credentials: 'same-origin' })
+                .then(response => {
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return null;
+                    }
+                    return response.json();
+                })
+                .then(user => {
+                    if (user) {
+                        document.getElementById('currentUsername').textContent = user.nome_completo || user.username;
+                    }
+                })
+                .catch(error => console.error('Errore caricamento utente:', error));
+        }
+
+        // Setup tab switching
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tabName = e.target.dataset.tab;
+                
+                // Deseleziona tutti i tab
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Seleziona il tab cliccato
+                e.target.classList.add('active');
+                document.getElementById(tabName).classList.add('active');
+                
+                // Carica i dati se necessario
+                loadTabData(tabName);
+            });
+        });
+
+        async function loadUserDashboard() {
+            try {
+                const response = await fetch(`/api/admin/utenti/${utenteId}/dashboard`);
+                if (!response.ok) throw new Error('Failed to load dashboard');
+                const data = await response.json();
+                
+                // Popola header
+                document.getElementById('userName').textContent = data.utente.nome_completo;
+                document.getElementById('userEmail').textContent = data.utente.email;
+                document.getElementById('userRole').textContent = data.utente.ruolo === 'admin' ? '👤 Admin' : '👤 User';
+                document.getElementById('userLastAccess').textContent = data.utente.ultimo_accesso ? new Date(data.utente.ultimo_accesso).toLocaleString('it-IT') : 'Mai';
+                document.getElementById('userCreated').textContent = new Date(data.utente.data_creazione).toLocaleString('it-IT');
+                
+                // Popola statistiche
+                document.getElementById('statTrasferte').textContent = data.statistiche.totale_trasferte;
+                document.getElementById('statKm').textContent = data.statistiche.totale_km.toLocaleString('it-IT');
+                document.getElementById('statRimborsi').textContent = '€ ' + data.statistiche.totale_rimborsi.toLocaleString('it-IT', {minimumFractionDigits: 2});
+                document.getElementById('statVeicoli').textContent = data.statistiche.num_veicoli;
+                document.getElementById('statIndirizzi').textContent = data.statistiche.num_indirizzi;
+                document.getElementById('statClienti').textContent = data.statistiche.num_clienti;
+                
+                // Mostra header e stats
+                document.getElementById('userHeader').style.display = 'block';
+                document.getElementById('statsSection').style.display = 'block';
+                
+                // Mostra pulsante reset 2FA se l'utente ha 2FA abilitato
+                if (data.utente.totp_enabled) {
+                    document.getElementById('reset2faBtn').style.display = 'inline-block';
+                }
+                
+                // Popola tab dashboard
+                const dashboardContent = document.getElementById('dashboard');
+                dashboardContent.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                        ${data.veicoli.length > 0 ? `
+                            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <h3>Veicoli (${data.veicoli.length})</h3>
+                                <ul style="list-style: none; padding: 0;">
+                                    ${data.veicoli.map(v => `<li>🚗 ${v.marca} ${v.modello} (${v.alimentazione})</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                        ${data.indirizzi.length > 0 ? `
+                            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <h3>Indirizzi (${data.indirizzi.length})</h3>
+                                <ul style="list-style: none; padding: 0;">
+                                    ${data.indirizzi.map(i => `<li>📍 ${i.nome} - ${i.citta}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                        ${data.clienti.length > 0 ? `
+                            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <h3>Clienti (${data.clienti.length})</h3>
+                                <ul style="list-style: none; padding: 0;">
+                                    ${data.clienti.map(c => `<li>🏢 ${c.nome}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+            } catch (error) {
+                showError('Errore nel caricamento della dashboard: ' + error.message);
+            }
+        }
+
+        async function loadTabData(tabName) {
+            const contentDiv = document.getElementById(tabName);
+            
+            if (tabName === 'dashboard') {
+                // Dashboard è già caricato
+                return;
+            }
+            
+            let endpoint = '';
+            if (tabName === 'trasferte') endpoint = `/api/admin/utenti/${utenteId}/trasferte`;
+            else if (tabName === 'veicoli') endpoint = `/api/admin/utenti/${utenteId}/veicoli`;
+            else if (tabName === 'indirizzi') endpoint = `/api/admin/utenti/${utenteId}/indirizzi`;
+            else if (tabName === 'clienti') endpoint = `/api/admin/utenti/${utenteId}/clienti`;
+            
+            try {
+                const response = await fetch(endpoint);
+                if (!response.ok) throw new Error('Failed to load data');
+                const data = await response.json();
+                
+                let htmlContent = '';
+                
+                if (tabName === 'trasferte') {
+                    if (data.trasferte.length === 0) {
+                        htmlContent = '<div class="empty-state"><p>Nessuna trasferta</p></div>';
+                    } else {
+                        htmlContent = `
+                            <p style="margin-bottom: 15px; color: #666;">
+                                <strong>Totali:</strong> ${data.totali.numero_trasferte} trasferte | ${data.totali.km} km | € ${data.totali.rimborsi.toLocaleString('it-IT', {minimumFractionDigits: 2})}
+                            </p>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Partenza</th>
+                                        <th>Arrivo</th>
+                                        <th>KM</th>
+                                        <th>Motivo</th>
+                                        <th>Rimborso</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.trasferte.map(t => `
+                                        <tr>
+                                            <td>${new Date(t.data).toLocaleDateString('it-IT')}</td>
+                                            <td><strong>${t.partenza.nome || 'Partenza'}</strong><br>${t.partenza.via}<br>${t.partenza.cap} ${t.partenza.citta}</td>
+                                            <td><strong>${t.arrivo.nome || 'Arrivo'}</strong><br>${t.arrivo.via}<br>${t.arrivo.cap} ${t.arrivo.citta}</td>
+                                            <td>${(t.chilometri * (t.andata_ritorno ? 2 : 1)).toLocaleString('it-IT')}</td>
+                                            <td>${t.motivo}</td>
+                                            <td>€ ${parseFloat(t.rimborso).toLocaleString('it-IT', {minimumFractionDigits: 2})}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        `;
+                    }
+                } else if (tabName === 'veicoli') {
+                    if (data.veicoli.length === 0) {
+                        htmlContent = '<div class="empty-state"><p>Nessun veicolo</p></div>';
+                    } else {
+                        htmlContent = `
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Marca</th>
+                                        <th>Modello</th>
+                                        <th>Alimentazione</th>
+                                        <th>Tariffa €/km</th>
+                                        <th>Data Creazione</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.veicoli.map(v => `
+                                        <tr>
+                                            <td>${v.marca}</td>
+                                            <td>${v.modello}</td>
+                                            <td>${v.alimentazione}</td>
+                                            <td>€ ${parseFloat(v.tariffa_km).toLocaleString('it-IT', {minimumFractionDigits: 4})}</td>
+                                            <td>${new Date(v.data_creazione).toLocaleDateString('it-IT')}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        `;
+                    }
+                } else if (tabName === 'indirizzi') {
+                    if (data.indirizzi.length === 0) {
+                        htmlContent = '<div class="empty-state"><p>Nessun indirizzo</p></div>';
+                    } else {
+                        htmlContent = `
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Via</th>
+                                        <th>Città</th>
+                                        <th>CAP</th>
+                                        <th>Paese</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.indirizzi.map(i => `
+                                        <tr>
+                                            <td>${i.nome}</td>
+                                            <td>${i.via}</td>
+                                            <td>${i.citta}</td>
+                                            <td>${i.cap}</td>
+                                            <td>${i.paese}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        `;
+                    }
+                } else if (tabName === 'clienti') {
+                    if (data.clienti.length === 0) {
+                        htmlContent = '<div class="empty-state"><p>Nessun cliente</p></div>';
+                    } else {
+                        htmlContent = `
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Via</th>
+                                        <th>Città</th>
+                                        <th>CAP</th>
+                                        <th>Paese</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.clienti.map(c => `
+                                        <tr>
+                                            <td>${c.nome}</td>
+                                            <td>${c.via}</td>
+                                            <td>${c.citta}</td>
+                                            <td>${c.cap}</td>
+                                            <td>${c.paese}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        `;
+                    }
+                }
+                
+                contentDiv.innerHTML = htmlContent;
+            } catch (error) {
+                contentDiv.innerHTML = '<div class="error-message">Errore nel caricamento dei dati</div>';
+                showError('Errore: ' + error.message);
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function logout() {
+            window.location.href = '/logout';
+        }
+
+        async function deleteUser() {
+            const userName = document.getElementById('userName').textContent;
+            if (confirm(`Sei sicuro di voler eliminare l'utente "${userName}"? Questa azione non può essere annullata.`)) {
+                const secondConfirm = prompt(`Digita il nome completo dell'utente (${userName}) per confermare l'eliminazione:`);
+                if (secondConfirm === userName) {
+                    try {
+                        const response = await fetch(`/api/utenti/${utenteId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        
+                        if (response.ok || response.status === 204) {
+                            alert('Utente eliminato con successo');
+                            window.location.href = '{{ url_for("impostazioni_utenti") }}';
+                        } else {
+                            const data = await response.json();
+                            alert('Errore nell\'eliminazione: ' + (data.error || 'Errore sconosciuto'));
+                        }
+                    } catch (error) {
+                        alert('Errore nell\'eliminazione: ' + error.message);
+                    }
+                } else {
+                    alert('Nome non corrispondente. Eliminazione annullata.');
+                }
+            }
+        }
+
+        function toggleMobileMenu() {
+            const navMenu = document.getElementById('navMenu');
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            navMenu.classList.toggle('active');
+            hamburgerBtn.classList.toggle('active');
+        }
+
+        // Chiudi menu quando clicchi su un link
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('navMenu').classList.remove('active');
+                document.getElementById('hamburgerBtn').classList.remove('active');
+            });
+        });
+
+        // Chiudi menu quando ridimensioni la finestra
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                document.getElementById('navMenu').classList.remove('active');
+                document.getElementById('hamburgerBtn').classList.remove('active');
+            }
+        });
+
+        // Funzione per resettare 2FA
+        function resetUser2FA() {
+            // Estrai ID dal pathname
+            const pathParts = window.location.pathname.split('/');
+            const userId = pathParts[pathParts.length - 1];
+            
+            if (!userId || userId === 'null') {
+                alert('❌ Errore: ID utente non trovato');
+                return;
+            }
+            
+            if (!confirm('⚠️ Vuoi davvero resettare l\'autenticazione a 2 fattori per questo utente?\n\nL\'utente dovrà riconfigurare 2FA al prossimo accesso.')) {
+                return;
+            }
+
+            fetch(`/api/admin/2fa-reset/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('✅ ' + data.message);
+                    location.reload();
+                } else {
+                    alert('❌ Errore: ' + (data.error || data.message));
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('❌ Errore durante il reset di 2FA');
+            });
+        }
+
+        // Carica dati all'inizio
+        loadCurrentUser();
+        loadUserDashboard();
+    </script>
+
+    <!-- Global Footer -->
+    <div id="footer-container"></div>
+
+    <script>
+        // Carica il footer HTML
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/templates/footer.html')
+                .then(r => r.text())
+                .then(html => {
+                    document.getElementById('footer-container').innerHTML = html;
+                    const scripts = document.getElementById('footer-container').querySelectorAll('script');
+                    scripts.forEach(script => {
+                        const newScript = document.createElement('script');
+                        newScript.textContent = script.textContent;
+                        document.body.appendChild(newScript);
+                    });
+                })
+                .catch(err => console.error('Errore caricamento footer:', err));
+            
+            setupMenuVisibility();
+        });
+    </script>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>    </script>
+</body>
+</html>

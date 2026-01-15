@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Autenticazione a 2 Fattori - RIMBORSO KM</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Rimborso KM" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f9fafb 0%, #eff2f5 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .page-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 0;
+        }
+
+        .page-header {
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            font-size: 16px;
+            color: #666666;
+        }
+
+        .setup-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .setup-left {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .setup-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+        }
+
+        .step-indicator {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: linear-gradient(135deg, #0071e3 0%, #0064c8 100%);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .step-content p {
+            font-size: 14px;
+            color: #666666;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .app-list {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+
+        .app-list-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            font-size: 13px;
+            color: #1a1a1a;
+        }
+
+        .app-list-item:not(:last-child) {
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .app-icon {
+            font-size: 16px;
+        }
+
+        .setup-right {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .qr-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+            text-align: center;
+        }
+
+        .qr-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+        }
+
+        .qr-container {
+            background: #f9fafb;
+            border: 2px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 280px;
+        }
+
+        .qr-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .qr-or {
+            text-align: center;
+            font-size: 13px;
+            color: #999999;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .qr-or::before,
+        .qr-or::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 30%;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        .qr-or::before {
+            left: 0;
+        }
+
+        .qr-or::after {
+            right: 0;
+        }
+
+        .secret-box {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            padding: 14px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            color: #1a1a1a;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            user-select: all;
+        }
+
+        .copy-btn {
+            width: 100%;
+            padding: 10px 16px;
+            background: white;
+            color: #0071e3;
+            border: 1.5px solid #0071e3;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #f0f4ff;
+        }
+
+        .verification-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a1a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-align: center;
+            transition: all 0.2s;
+            background: #f9fafb;
+        }
+
+        .form-group input::placeholder {
+            color: #999999;
+            letter-spacing: 0;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #0071e3;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+        }
+
+        .error-message {
+            color: #c33;
+            background: #fee;
+            border: 1px solid #fcc;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .warning-box {
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-left: 4px solid #f59e0b;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .warning-box p {
+            color: #92400e;
+            font-size: 13px;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #0071e3 0%, #0064c8 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 16px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 113, 227, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .footer-info {
+            background: white;
+            border-radius: 16px;
+            padding: 20px 32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+            text-align: center;
+            grid-column: 1 / -1;
+        }
+
+        .footer-info p {
+            font-size: 13px;
+            color: #666666;
+            margin: 0;
+        }
+
+        .footer-info strong {
+            color: #1a1a1a;
+        }
+
+        .footer-link {
+            color: #0071e3;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #999999;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 1024px) {
+            .setup-container {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-wrapper {
+                padding: 20px 0;
+            }
+
+            .page-header {
+                margin-bottom: 24px;
+            }
+
+            .page-header h1 {
+                font-size: 24px;
+            }
+
+            .setup-card,
+            .qr-card,
+            .verification-card,
+            .footer-info {
+                padding: 24px;
+            }
+
+            .setup-container {
+                gap: 20px;
+            }
+
+            .setup-left,
+            .setup-right {
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="page-header">
+            <h1>🔐 Autenticazione a 2 Fattori</h1>
+            <p>Configura la sicurezza del tuo account con autenticazione a due fattori</p>
+        </div>
+
+        <div class="setup-container">
+            <!-- Colonna sinistra: Istruzioni -->
+            <div class="setup-left">
+                <!-- Step 1 -->
+                <div class="setup-card">
+                    <div class="step-indicator">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Scarica un'app di autenticazione</h3>
+                            <p>Scegli una di queste applicazioni sul tuo smartphone o computer per generare codici di sicurezza:</p>
+                            <div class="app-list">
+                                <div class="app-list-item">
+                                    <span class="app-icon">📱</span>
+                                    <strong>Google Authenticator</strong> (Android/iOS)
+                                </div>
+                                <div class="app-list-item">
+                                    <span class="app-icon">🔑</span>
+                                    <strong>Microsoft Authenticator</strong> (Android/iOS)
+                                </div>
+                                <div class="app-list-item">
+                                    <span class="app-icon">🛡️</span>
+                                    <strong>Authy</strong> (Android/iOS/Desktop)
+                                </div>
+                                <div class="app-list-item">
+                                    <span class="app-icon">🔓</span>
+                                    <strong>Bitwarden</strong> (Gestore password integrato)
+                                </div>
+                                <div class="app-list-item">
+                                    <span class="app-icon">⚡</span>
+                                    <strong>FreeOTP</strong> (Android/iOS - Open Source)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="setup-card">
+                    <div class="step-indicator">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Inserisci il codice segreto</h3>
+                            <p>Copia il codice segreto mostrato sulla destra e incollalo nella tua app di autenticazione (Google Authenticator, Bitwarden, Microsoft Authenticator, etc.).</p>
+                            <p style="margin-bottom: 0;"><strong>L'app genererà automaticamente i codici</strong> di accesso a 6 cifre che cambiano ogni 30 secondi.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="setup-card">
+                    <div class="step-indicator">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Verifica il codice</h3>
+                            <p>Inserisci il codice a 6 cifre che vedi nell'app di autenticazione nel modulo sulla colonna destra. Questo codice cambia ogni 30 secondi.</p>
+                            <p style="margin-bottom: 0;"><strong>Attenzione:</strong> Conserva i codici di backup in un luogo sicuro. Servono se perdi l'accesso al dispositivo di autenticazione.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonna destra: Codice Segreto e Form -->
+            <div class="setup-right">
+                <!-- Codice Segreto Card -->
+                <div class="qr-card">
+                    <div class="qr-title">Codice segreto di autenticazione</div>
+
+                    {% if temp_totp_secret %}
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Copia e incolla questo codice nella tua app di autenticazione
+                        </label>
+                        <div class="secret-box">{{ temp_totp_secret }}</div>
+                        <button type="button" onclick="copySecret()" class="copy-btn">📋 Copia codice</button>
+                        <p class="help-text">Incolla questo codice nella tua app di autenticazione (Google Authenticator, Bitwarden, Microsoft Authenticator, etc.)</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Verification Card -->
+                <form method="POST" class="verification-card">
+                    <div class="warning-box">
+                        <p>⚠️ <strong>Importante:</strong> Questo passaggio è obbligatorio. Ti richiederà meno di 1 minuto.</p>
+                    </div>
+
+                    {% if error %}
+                    <div class="error-message">
+                        ❌ {{ error }}
+                    </div>
+                    {% endif %}
+
+                    <div class="form-group">
+                        <label for="code">Codice TOTP (6 cifre)</label>
+                        <input type="text" 
+                               id="code" 
+                               name="code" 
+                               maxlength="6" 
+                               placeholder="000000" 
+                               required 
+                               pattern="[0-9]{6}"
+                               inputmode="numeric"
+                               autocomplete="off"
+                               autofocus>
+                        <p class="help-text">Inserisci il codice a 6 cifre mostrato nell'app di autenticazione</p>
+                    </div>
+
+                    <button type="submit" class="submit-btn">✓ Verifica e Continua</button>
+                </form>
+            </div>
+
+            <!-- Footer Info -->
+            <div class="footer-info">
+                <p>Sei <strong>{{ username }}</strong></p>
+                <p style="margin-top: 8px;">
+                    <a href="{{ url_for('logout') }}" class="footer-link">Non sei tu? Accedi con un altro account</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Formatta automaticamente il codice mentre lo digiti
+        document.getElementById('code').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+        });
+
+        function copySecret() {
+            const secretBox = document.querySelector('.secret-box');
+            const text = secretBox.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ Codice copiato negli appunti!');
+            }).catch(() => {
+                alert('❌ Errore nella copia');
+            });
+        }
+
+        // Focus automatico sul campo codice
+        document.getElementById('code').focus();
+    </script>
+</body>
+</html>

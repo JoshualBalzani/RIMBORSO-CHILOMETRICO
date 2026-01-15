@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.egg-info/
+.Python
+.venv
+venv/
+env/
+*.egg
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+.env.local
+
+# Docs (optional)
+*.md
+
+# Testing
+.pytest_cache
+.coverage
+
+# Batch files
+*.bat
+
+# Logs (temporanei, verranno creati nel container)
+logs/
+*.log
+
+# Node (se non usato)
+node_modules/
+package-lock.json
